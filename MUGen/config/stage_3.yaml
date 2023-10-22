@@ -13,6 +13,6 @@ train:
     epochs: 1
     max_length: 512
     max_shard_size: 10GB
-    dataset_name_list: ['alpaca_instruction', 'musicqa_instruction']
+    dataset_name_list: ['alpaca_instruction', 'musicqa_instruction', 'muimage_instruction', 'muvideo_instruction']
 
 

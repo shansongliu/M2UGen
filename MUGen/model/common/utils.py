@@ -274,7 +274,7 @@ def process_batch_stage_2(tokenizer, batch_of_captions, max_tgt_len, num_signal_
 # def process_batch_stage_2(tokenizer, batch_of_captions, )
 
 
-def build_one_instance_stage_3(tokenizer, conversation, img_tokens=4, vid_tokens=24, aud_tokens=8):
+def build_one_instance_stage_3(tokenizer, conversation, aud_tokens=8):
     text_list = []
     turn_num = len(conversation)
     input_ids, target_ids = [], []
@@ -298,7 +298,7 @@ def build_one_instance_stage_3(tokenizer, conversation, img_tokens=4, vid_tokens
                 target_ids += [-100] * len(one_input_id)
             elif role == 'gpt':
                 if turn['output_modality'] == 'audio':
-                    signal_tokens = ' '.join([f'[AUD{i}]' for i in range(aud_tokens)])
+                    signal_tokens = ''.join([f'[AUD{i}]' for i in range(aud_tokens)])
                 else:
                     signal_tokens = ''
                 caption = turn['caption']
@@ -313,7 +313,7 @@ def build_one_instance_stage_3(tokenizer, conversation, img_tokens=4, vid_tokens
     return text_list, input_ids, target_ids, caption
 
 
-def process_batch_stage_3(tokenizer, batch_of_conversations, max_tgt_len, img_tokens=4, vid_tokens=24, aud_tokens=8):
+def process_batch_stage_3(tokenizer, batch_of_conversations, max_tgt_len, aud_tokens=8):
     """
     :param mode: the target modality
     :param num_tokens: the number of generated signal tokens for generation
@@ -322,8 +322,6 @@ def process_batch_stage_3(tokenizer, batch_of_conversations, max_tgt_len, img_to
     # batch_caption_lists = []
     for conversation in batch_of_conversations:
         _, one_input_ids, one_target_ids, caption = build_one_instance_stage_3(tokenizer, conversation,
-                                                                               img_tokens=img_tokens,
-                                                                               vid_tokens=vid_tokens,
                                                                                aud_tokens=aud_tokens)
         batch_input_ids.append(torch.LongTensor(one_input_ids))
         batch_target_ids.append(torch.LongTensor(one_target_ids))

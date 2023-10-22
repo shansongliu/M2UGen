@@ -7,4 +7,4 @@ train:
     epochs: 1
     max_length: 512
     max_shard_size: 10GB
-    dataset_name_list: ['mucaps_enc']
+    dataset_name_list: ['mucaps_enc', 'coco_enc', 'videocaps_enc']

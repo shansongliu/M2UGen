@@ -9,7 +9,7 @@ import json
 
 # Load a slightly modified version of the Stable Diffusion pipeline.
 # This allows us to extract text embeddings directly (without generating images).
-from model.audioldm2 import AudioLDM2Pipeline
+from model.custom_ad import AudioLDMPipeline
 
 
 
@@ -66,7 +66,7 @@ if __name__ == '__main__':
             if one_audio_name not in existing_files:
                 caption_list.append(one_caption)
                 name_list.append(os.path.join(data_dir, one_audio_name))
-    pipe = AudioLDM2Pipeline.from_pretrained("/hpctmp/e0589920/audioldm2-music", torch_dtype=dtype)
+    pipe = AudioLDMPipeline.from_pretrained("/hpctmp/e0589920/audioldm-l-full", torch_dtype=dtype)
     pipe = pipe.to("cuda")
 
     print('Extract embeddings in batches.')

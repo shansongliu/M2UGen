@@ -36,8 +36,10 @@ class BaseDataset(Dataset):
         return len(self.mm_path_list)
 
     def __getitem__(self, i):
-        with open(os.path.join(self.embed_path, str(os.path.basename(self.mm_path_list[i])) + '.npy'), 'rb') as f:
-            caption_embs = torch.from_numpy(np.load(f, allow_pickle=True))  # (num_clip_tokens, 768)
+        caption_embs = None
+        if os.path.exists(os.path.join(self.embed_path, str(os.path.basename(self.mm_path_list[i])) + '.npy')):
+            with open(os.path.join(self.embed_path, str(os.path.basename(self.mm_path_list[i])) + '.npy'), 'rb') as f:
+                caption_embs = torch.from_numpy(np.load(f, allow_pickle=True))  # (num_clip_tokens, 768)
 
         return dict(mm_paths=self.mm_path_list[i], output_texts=self.caption_list[i], caption_embs=caption_embs,
                     dataset_types=self.dataset_type_list[i])

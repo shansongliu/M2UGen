@@ -7,7 +7,7 @@ from header import *
 from torch.cuda.amp import autocast
 from .modeling_llama import LlamaForCausalLM
 from transformers import StoppingCriteria, StoppingCriteriaList
-from .custom_ad import AudioLDMPipeline
+from .audioldm2 import AudioLDM2Pipeline
 from .layers import *
 from .common.utils import *
 from .encoders import *
@@ -49,11 +49,8 @@ class MUGen(nn.Module):
 
         print(f'Initializing Encoders ...')
         self.mert = MERTEncoder()
-        self.mert.to(self.device)
         self.vit = ViTEncoder()
-        self.vit.to(self.device)
         self.vivit = ViViTEncoder()
-        self.vivit.to(self.device)
         print('Encoders initialized.')
 
         vicuna_ckpt_path = "./ckpt/pretrained_ckpt/LLaMA-2/7B"  # os.path.join(self.args['pretrained_ckpt_path'], 'vicuna_ckpt', self.args['vicuna_version'])
@@ -143,17 +140,17 @@ class MUGen(nn.Module):
             self.args['gen_audio_token_idx'].append(gen_token_idx[0])
 
     def encode_video(self, video_paths):
-        inputs_llama = self.vivit(video_paths)  # bsz x 1 x llama_size
+        inputs_llama = self.vivit(video_paths).to(self.device)   # bsz x 1 x llama_size
         atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(self.device)  # bsz x 1
         return inputs_llama, atts_llama
 
     def encode_audio(self, audio_paths):
-        inputs_llama = self.mert(audio_paths)  # bsz x 1 x llama_size
+        inputs_llama = self.mert(audio_paths).to(self.device)   # bsz x 1 x llama_size
         atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(self.device)  # bsz x 1
         return inputs_llama, atts_llama
 
     def encode_image(self, image_paths):
-        inputs_llama = self.mert(image_paths)  # bsz x 1 x llama_size
+        inputs_llama = self.vit(image_paths).to(self.device)  # bsz x 1 x llama_size
         atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(self.device)  # bsz x 1
         return inputs_llama, atts_llama
 
@@ -253,8 +250,6 @@ class MUGen(nn.Module):
                                                                           )
         elif stage == 3:
             input_ids, target_ids, attention_mask = process_batch_stage_3(self.llama_tokenizer, texts, self.max_length,
-                                                                          self.args['num_gen_img_tokens'],
-                                                                          self.args['num_gen_video_tokens'],
                                                                           self.args['num_gen_audio_tokens']
                                                                           )
         else:
@@ -315,7 +310,7 @@ class MUGen(nn.Module):
                 mse_loss = l2_loss(embeddings, torch.stack(text_prompt_embeddins, dim=0).to(self.device))
             else:
                 text_prompt_embeddins = torch.stack(text_prompt_embeddins, dim=0).to(self.device)
-                assert len(text_prompt_embeddins.shape) == 2, text_prompt_embeddins.shape
+                assert len(text_prompt_embeddins.shape) == 2, (text_prompt_embeddins.shape, embeddings.shape)
                 text_prompt_embeddins = text_prompt_embeddins.view(text_prompt_embeddins.size(0), 1,
                                                                    text_prompt_embeddins.size(1))
                 mse_loss = l2_loss(embeddings, text_prompt_embeddins)
@@ -421,6 +416,24 @@ class MUGen(nn.Module):
             input_paths = inputs["input_paths"]
             img_embeds, _ = self.encode_image(input_paths)
             loss, gen_acc, _ = self._train_with_mode(inputs['output_texts'], img_embeds, 'audio',
+                                                     self.args['num_gen_audio_tokens'],
+                                                     self.gen_text_hidden_fcs_audio,
+                                                     self.args['gen_audio_token_idx'],
+                                                     self.args['text_emb_to_audio_layers'],
+                                                     inputs['output_embs'], stage=self.stage)
+        elif dataset_type == "VideoToAudio":
+            video_paths = inputs['mm_paths']
+            video_embeds, _ = self.encode_video(video_paths)
+            loss, gen_acc, _ = self._train_with_mode(inputs['output_texts'], video_embeds, 'audio',
+                                                     self.args['num_gen_audio_tokens'],
+                                                     self.gen_text_hidden_fcs_audio,
+                                                     self.args['gen_audio_token_idx'],
+                                                     self.args['text_emb_to_audio_layers'],
+                                                     inputs['output_embs'], stage=self.stage)
+        elif dataset_type == "AudioToAudio":
+            audio_paths = inputs['mm_paths']
+            audio_embeds, _ = self.encode_audio(audio_paths)
+            loss, gen_acc, _ = self._train_with_mode(inputs['output_texts'], audio_embeds, 'audio',
                                                      self.args['num_gen_audio_tokens'],
                                                      self.gen_text_hidden_fcs_audio,
                                                      self.args['gen_audio_token_idx'],
@@ -622,7 +635,7 @@ class MUGen(nn.Module):
         """
         return_outputs = []
         last_ret_idx = 0
-        generation_model = AudioLDMPipeline.from_pretrained(self.ad_ckpt_path, torch_dtype=torch.float16).to("cuda")
+        generation_model = AudioLDM2Pipeline.from_pretrained(self.ad_ckpt_path, torch_dtype=torch.float16).to("cuda")
         for gen_idx in all_gen_idx:
             assert generated_ids[0,
                    gen_idx:gen_idx + self.args['num_gen_audio_tokens']].cpu().detach().numpy().tolist() == \
@@ -633,7 +646,7 @@ class MUGen(nn.Module):
             raw_emb = embeddings[:, gen_idx - 1:gen_idx - 1 + self.args['num_gen_audio_tokens'], :]  # (1, 8, 4096)
 
             # Produce generation embedding.
-            gen_prefix = ' '.join([f'[AUD{i}]' for i in range(self.args['num_gen_audio_tokens'])])
+            gen_prefix = ''.join([f'[AUD{i}]' for i in range(self.args['num_gen_audio_tokens'])])
             gen_prefx_ids = self.llama_tokenizer(gen_prefix, add_special_tokens=False,
                                                  return_tensors="pt").input_ids.to(self.device)
             gen_prefix_embs = self.input_embeddings(gen_prefx_ids)  # (1, T_I_V_A.txt, D)
