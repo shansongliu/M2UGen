@@ -290,7 +290,7 @@ class AudioLDM2Pipeline(DiffusionPipeline):
             device,
             num_waveforms_per_prompt,
             do_classifier_free_guidance,
-            negative_prompt=None,
+            negative_prompt="Low Quality",
             prompt_embeds: Optional[torch.FloatTensor] = None,
             negative_prompt_embeds: Optional[torch.FloatTensor] = None,
             generated_prompt_embeds: Optional[torch.FloatTensor] = None,
@@ -346,210 +346,6 @@ class AudioLDM2Pipeline(DiffusionPipeline):
             generated_prompt_embeds (`torch.FloatTensor`):
                 Text embeddings generated from the GPT2 langauge model.
         """
-        # if prompt is not None and isinstance(prompt, str):
-        #     batch_size = 1
-        # elif prompt is not None and isinstance(prompt, list):
-        #     batch_size = len(prompt)
-        # else:
-        #     batch_size = prompt_embeds.shape[0]
-        #
-        # # Define tokenizers and text encoders
-        # tokenizers = [self.tokenizer, self.tokenizer_2]
-        # text_encoders = [self.text_encoder, self.text_encoder_2]
-        #
-        # if prompt_embeds is None:
-        #     prompt_embeds_list = []
-        #     attention_mask_list = []
-        #
-        #     for tokenizer, text_encoder in zip(tokenizers, text_encoders):
-        #         text_inputs = tokenizer(
-        #             prompt,
-        #             padding="max_length" if isinstance(tokenizer, (RobertaTokenizer, RobertaTokenizerFast)) else True,
-        #             max_length=tokenizer.model_max_length,
-        #             truncation=True,
-        #             return_tensors="pt",
-        #         )
-        #         text_input_ids = text_inputs.input_ids
-        #         attention_mask = text_inputs.attention_mask
-        #         untruncated_ids = tokenizer(prompt, padding="longest", return_tensors="pt").input_ids
-        #
-        #         if untruncated_ids.shape[-1] >= text_input_ids.shape[-1] and not torch.equal(
-        #                 text_input_ids, untruncated_ids
-        #         ):
-        #             removed_text = tokenizer.batch_decode(untruncated_ids[:, tokenizer.model_max_length - 1: -1])
-        #             logger.warning(
-        #                 f"The following part of your input was truncated because {text_encoder.config.model_type} can "
-        #                 f"only handle sequences up to {tokenizer.model_max_length} tokens: {removed_text}"
-        #             )
-        #
-        #         text_input_ids = text_input_ids.to(device)
-        #         attention_mask = attention_mask.to(device)
-        #
-        #         if text_encoder.config.model_type == "clap":
-        #             prompt_embeds = text_encoder.get_text_features(
-        #                 text_input_ids,
-        #                 attention_mask=attention_mask,
-        #             )
-        #             # append the seq-len dim: (bs, hidden_size) -> (bs, seq_len, hidden_size)
-        #             prompt_embeds = prompt_embeds[:, None, :]
-        #             # make sure that we attend to this single hidden-state
-        #             attention_mask = attention_mask.new_ones((batch_size, 1))
-        #         else:
-        #             prompt_embeds = text_encoder(
-        #                 text_input_ids,
-        #                 attention_mask=attention_mask,
-        #             )
-        #             prompt_embeds = prompt_embeds[0]
-        #         prompt_embeds_list.append(prompt_embeds)
-        #         attention_mask_list.append(attention_mask)
-        #
-        #     projection_output = self.projection_model(
-        #         hidden_states=prompt_embeds_list[0],
-        #         hidden_states_1=prompt_embeds_list[1],
-        #         attention_mask=attention_mask_list[0],
-        #         attention_mask_1=attention_mask_list[1],
-        #     )
-        #     projected_prompt_embeds = projection_output.hidden_states
-        #     projected_attention_mask = projection_output.attention_mask
-        #
-        #     generated_prompt_embeds = self.generate_language_model(
-        #         projected_prompt_embeds,
-        #         attention_mask=projected_attention_mask,
-        #         max_new_tokens=max_new_tokens,
-        #     )
-        #
-        # prompt_embeds = prompt_embeds.to(dtype=self.text_encoder_2.dtype, device=device)
-        # attention_mask = (
-        #     attention_mask.to(device=device)
-        #     if attention_mask is not None
-        #     else torch.ones(prompt_embeds.shape[:2], dtype=torch.long, device=device)
-        # )
-        # generated_prompt_embeds = generated_prompt_embeds.to(dtype=self.language_model.dtype, device=device)
-        #
-        # bs_embed, seq_len, hidden_size = prompt_embeds.shape
-        # # duplicate text embeddings for each generation per prompt, using mps friendly method
-        # prompt_embeds = prompt_embeds.repeat(1, num_waveforms_per_prompt, 1)
-        # prompt_embeds = prompt_embeds.view(bs_embed * num_waveforms_per_prompt, seq_len, hidden_size)
-        #
-        # # duplicate attention mask for each generation per prompt
-        # attention_mask = attention_mask.repeat(1, num_waveforms_per_prompt)
-        # attention_mask = attention_mask.view(bs_embed * num_waveforms_per_prompt, seq_len)
-        #
-        # bs_embed, seq_len, hidden_size = generated_prompt_embeds.shape
-        # # duplicate generated embeddings for each generation per prompt, using mps friendly method
-        # generated_prompt_embeds = generated_prompt_embeds.repeat(1, num_waveforms_per_prompt, 1)
-        # generated_prompt_embeds = generated_prompt_embeds.view(
-        #     bs_embed * num_waveforms_per_prompt, seq_len, hidden_size
-        # )
-        #
-        # # get unconditional embeddings for classifier free guidance
-        # if do_classifier_free_guidance and negative_prompt_embeds is None:
-        #     uncond_tokens: List[str]
-        #     if negative_prompt is None:
-        #         uncond_tokens = [""] * batch_size
-        #     elif type(prompt) is not type(negative_prompt):
-        #         raise TypeError(
-        #             f"`negative_prompt` should be the same type to `prompt`, but got {type(negative_prompt)} !="
-        #             f" {type(prompt)}."
-        #         )
-        #     elif isinstance(negative_prompt, str):
-        #         uncond_tokens = [negative_prompt]
-        #     elif batch_size != len(negative_prompt):
-        #         raise ValueError(
-        #             f"`negative_prompt`: {negative_prompt} has batch size {len(negative_prompt)}, but `prompt`:"
-        #             f" {prompt} has batch size {batch_size}. Please make sure that passed `negative_prompt` matches"
-        #             " the batch size of `prompt`."
-        #         )
-        #     else:
-        #         uncond_tokens = negative_prompt
-        #
-        #     negative_prompt_embeds_list = []
-        #     negative_attention_mask_list = []
-        #     max_length = prompt_embeds.shape[1]
-        #     for tokenizer, text_encoder in zip(tokenizers, text_encoders):
-        #         uncond_input = tokenizer(
-        #             uncond_tokens,
-        #             padding="max_length",
-        #             max_length=tokenizer.model_max_length
-        #             if isinstance(tokenizer, (RobertaTokenizer, RobertaTokenizerFast))
-        #             else max_length,
-        #             truncation=True,
-        #             return_tensors="pt",
-        #         )
-        #
-        #         uncond_input_ids = uncond_input.input_ids.to(device)
-        #         negative_attention_mask = uncond_input.attention_mask.to(device)
-        #
-        #         if text_encoder.config.model_type == "clap":
-        #             negative_prompt_embeds = text_encoder.get_text_features(
-        #                 uncond_input_ids,
-        #                 attention_mask=negative_attention_mask,
-        #             )
-        #             # append the seq-len dim: (bs, hidden_size) -> (bs, seq_len, hidden_size)
-        #             negative_prompt_embeds = negative_prompt_embeds[:, None, :]
-        #             # make sure that we attend to this single hidden-state
-        #             negative_attention_mask = negative_attention_mask.new_ones((batch_size, 1))
-        #         else:
-        #             negative_prompt_embeds = text_encoder(
-        #                 uncond_input_ids,
-        #                 attention_mask=negative_attention_mask,
-        #             )
-        #             negative_prompt_embeds = negative_prompt_embeds[0]
-        #
-        #         negative_prompt_embeds_list.append(negative_prompt_embeds)
-        #         negative_attention_mask_list.append(negative_attention_mask)
-        #
-        #     projection_output = self.projection_model(
-        #         hidden_states=negative_prompt_embeds_list[0],
-        #         hidden_states_1=negative_prompt_embeds_list[1],
-        #         attention_mask=negative_attention_mask_list[0],
-        #         attention_mask_1=negative_attention_mask_list[1],
-        #     )
-        #     negative_projected_prompt_embeds = projection_output.hidden_states
-        #     negative_projected_attention_mask = projection_output.attention_mask
-        #
-        #     negative_generated_prompt_embeds = self.generate_language_model(
-        #         negative_projected_prompt_embeds,
-        #         attention_mask=negative_projected_attention_mask,
-        #         max_new_tokens=max_new_tokens,
-        #     )
-        #
-        # if do_classifier_free_guidance:
-        #     seq_len = negative_prompt_embeds.shape[1]
-        #
-        #     negative_prompt_embeds = negative_prompt_embeds.to(dtype=self.text_encoder_2.dtype, device=device)
-        #     negative_attention_mask = (
-        #         negative_attention_mask.to(device=device)
-        #         if negative_attention_mask is not None
-        #         else torch.ones(negative_prompt_embeds.shape[:2], dtype=torch.long, device=device)
-        #     )
-        #     negative_generated_prompt_embeds = negative_generated_prompt_embeds.to(
-        #         dtype=self.language_model.dtype, device=device
-        #     )
-        #
-        #     # duplicate unconditional embeddings for each generation per prompt, using mps friendly method
-        #     negative_prompt_embeds = negative_prompt_embeds.repeat(1, num_waveforms_per_prompt, 1)
-        #     negative_prompt_embeds = negative_prompt_embeds.view(batch_size * num_waveforms_per_prompt, seq_len, -1)
-        #
-        #     # duplicate unconditional attention mask for each generation per prompt
-        #     negative_attention_mask = negative_attention_mask.repeat(1, num_waveforms_per_prompt)
-        #     negative_attention_mask = negative_attention_mask.view(batch_size * num_waveforms_per_prompt, seq_len)
-        #
-        #     # duplicate unconditional generated embeddings for each generation per prompt
-        #     seq_len = negative_generated_prompt_embeds.shape[1]
-        #     negative_generated_prompt_embeds = negative_generated_prompt_embeds.repeat(1, num_waveforms_per_prompt, 1)
-        #     negative_generated_prompt_embeds = negative_generated_prompt_embeds.view(
-        #         batch_size * num_waveforms_per_prompt, seq_len, -1
-        #     )
-        #
-        #     # For classifier free guidance, we need to do two forward passes.
-        #     # Here we concatenate the unconditional and text embeddings into a single batch
-        #     # to avoid doing two forward passes
-        #     prompt_embeds = torch.cat([negative_prompt_embeds, prompt_embeds])
-        #     attention_mask = torch.cat([negative_attention_mask, attention_mask])
-        #     generated_prompt_embeds = torch.cat([negative_generated_prompt_embeds, generated_prompt_embeds])
-        #
-        # return prompt_embeds, attention_mask, generated_prompt_embeds
         if prompt is not None and isinstance(prompt, str):
             batch_size = 1
         elif prompt is not None and isinstance(prompt, list):
@@ -827,7 +623,7 @@ class AudioLDM2Pipeline(DiffusionPipeline):
             audio_length_in_s: Optional[float] = None,
             num_inference_steps: int = 200,
             guidance_scale: float = 3.5,
-            negative_prompt: Optional[Union[str, List[str]]] = None,
+            negative_prompt: Optional[Union[str, List[str]]] = "Low Quality",
             num_waveforms_per_prompt: Optional[int] = 1,
             eta: float = 0.0,
             generator: Optional[Union[torch.Generator, List[torch.Generator]]] = None,
