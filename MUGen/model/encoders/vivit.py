@@ -37,6 +37,8 @@ def read_video_pyav(container, indices):
 
 def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
     converted_len = int(clip_len * frame_sample_rate)
+    if converted_len > seg_len:
+        converted_len = 0
     end_idx = np.random.randint(converted_len, seg_len)
     start_idx = end_idx - converted_len
     indices = np.linspace(start_idx, end_idx, num=clip_len)

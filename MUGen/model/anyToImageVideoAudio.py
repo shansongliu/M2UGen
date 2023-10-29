@@ -140,7 +140,10 @@ class MUGen(nn.Module):
             self.args['gen_audio_token_idx'].append(gen_token_idx[0])
 
     def encode_video(self, video_paths):
-        inputs_llama = self.vivit(video_paths).to(self.device)   # bsz x 1 x llama_size
+        try:
+            inputs_llama = self.vivit(video_paths).to(self.device)   # bsz x 1 x llama_size
+        except:
+            inputs_llama = torch.zeros((len(video_paths), 1, 4096)).to(self.device)
         atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(self.device)  # bsz x 1
         return inputs_llama, atts_llama
 
@@ -304,16 +307,11 @@ class MUGen(nn.Module):
             # Obtain the embeddings produced by the text encoder of a frozen text-to-image generation model
             input_text = [conversation for conversation in texts]
 
-            if modality == 'image':
-                mse_loss = l2_loss(embeddings, torch.stack(text_prompt_embeddins, dim=0).to(self.device))
-            elif modality == 'video':
-                mse_loss = l2_loss(embeddings, torch.stack(text_prompt_embeddins, dim=0).to(self.device))
-            else:
-                text_prompt_embeddins = torch.stack(text_prompt_embeddins, dim=0).to(self.device)
-                assert len(text_prompt_embeddins.shape) == 2, (text_prompt_embeddins.shape, embeddings.shape)
-                text_prompt_embeddins = text_prompt_embeddins.view(text_prompt_embeddins.size(0), 1,
-                                                                   text_prompt_embeddins.size(1))
-                mse_loss = l2_loss(embeddings, text_prompt_embeddins)
+            text_prompt_embeddins = torch.stack(text_prompt_embeddins, dim=0).to(self.device)
+            assert len(text_prompt_embeddins.shape) == 2, (text_prompt_embeddins.shape, embeddings.shape)
+            text_prompt_embeddins = text_prompt_embeddins.view(text_prompt_embeddins.size(0), 1,
+                                                               text_prompt_embeddins.size(1))
+            mse_loss = l2_loss(embeddings, text_prompt_embeddins)
             mse_loss = mse_loss.mean()
             loss += loss_scale * mse_loss
             del outputs, targets, inputs_embeds, attention_mask
@@ -422,7 +420,7 @@ class MUGen(nn.Module):
                                                      self.args['text_emb_to_audio_layers'],
                                                      inputs['output_embs'], stage=self.stage)
         elif dataset_type == "VideoToAudio":
-            video_paths = inputs['mm_paths']
+            video_paths = inputs['input_paths']
             video_embeds, _ = self.encode_video(video_paths)
             loss, gen_acc, _ = self._train_with_mode(inputs['output_texts'], video_embeds, 'audio',
                                                      self.args['num_gen_audio_tokens'],
@@ -431,7 +429,7 @@ class MUGen(nn.Module):
                                                      self.args['text_emb_to_audio_layers'],
                                                      inputs['output_embs'], stage=self.stage)
         elif dataset_type == "AudioToAudio":
-            audio_paths = inputs['mm_paths']
+            audio_paths = inputs['input_paths']
             audio_embeds, _ = self.encode_audio(audio_paths)
             loss, gen_acc, _ = self._train_with_mode(inputs['output_texts'], audio_embeds, 'audio',
                                                      self.args['num_gen_audio_tokens'],

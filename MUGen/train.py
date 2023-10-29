@@ -102,7 +102,7 @@ def main(**args):
                 pbar=pbar
             )
             current_step += 1
-            if current_step % 2000 == 0:
+            if current_step % 200 == 0:
                 # torch.distributed.barrier()
                 agent.save_model(args['save_path'], current_step)
     # save at the end of the training
