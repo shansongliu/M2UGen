@@ -19,17 +19,18 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '7'
 # init the model
 
 parser = argparse.ArgumentParser(description='train parameters')
-parser.add_argument('--model', type=str, default='nextgpt')
+parser.add_argument('--model', type=str, default='mugen')
 parser.add_argument('--nextgpt_ckpt_path', type=str)  # the delta parameters trained in each stages
 parser.add_argument('--stage', type=int, default=3)  # the training stage
 parser.add_argument('--modality', type=list, default=['image', 'video', 'audio', 'text'])
 args = parser.parse_args()
 args = vars(args)
+args['mode'] = 'test'
 args.update(load_config(args))
 model = MUGen(**args)
 delta_ckpt = torch.load(os.path.join(args['nextgpt_ckpt_path'], f'pytorch_model.pt'), map_location=torch.device('cpu'))
 model.load_state_dict(delta_ckpt, strict=False)
-model = model.eval().half().cuda()
+model = model.eval()#.bfloat16().cuda()
 print(f'[!] init the 7b model over ...')
 
 g_cuda = torch.Generator(device='cuda').manual_seed(1337)

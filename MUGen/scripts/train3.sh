@@ -5,6 +5,6 @@
 python3 train.py \
     --model nextgpt \
     --stage 3\
-    --save_path  ./ckpt/delta_ckpt/nextgpt/7b_tiva_v0\
-    --log_path ./ckpt/delta_ckpt/nextgpt/7b_tiva_v0/log
+    --save_path  ./ckpt/MUGen/7b_llama_v1\
+    --log_path ./ckpt/MUGen/7b_llama_v1/log
 

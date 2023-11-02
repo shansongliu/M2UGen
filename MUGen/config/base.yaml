@@ -1,6 +1,6 @@
 # ========= system global ========== #
 models:
-    nextgpt:
+    mugen:
         model_name: MUGen
         agent_name: DeepSpeedAgent
 

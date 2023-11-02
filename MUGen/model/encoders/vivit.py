@@ -62,7 +62,7 @@ class ViViTEncoder(nn.Module):
         super().__init__()
         print(f'Initializing ViViT encoder from {vivit_path} ...')
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.vivit_model = VivitModel.from_pretrained(vivit_path)
+        self.vivit_model = VivitModel.from_pretrained(vivit_path).to(self.device)
         self.vivit_model.eval()
         self.vivit_processor = VivitImageProcessor.from_pretrained(vivit_path)
         self.iu_vivit_agg = nn.Conv1d(in_channels=3137, out_channels=1, kernel_size=1)
@@ -90,7 +90,7 @@ class ViViTEncoder(nn.Module):
     def encode_video(self, x) -> torch.Tensor:
         xs = []
         for sub_x in x:
-            inputs = self.vivit_processor(list(sub_x), return_tensors="pt")
+            inputs = self.vivit_processor(list(sub_x), return_tensors="pt").to(self.vivit_model.device)
             with torch.no_grad():
                 outputs = self.vivit_model(**inputs)
             last_hidden_states = outputs.last_hidden_state

@@ -74,12 +74,12 @@ class MERTEncoder(nn.Module):
                                               sampling_rate=self.mert_processor.sampling_rate,
                                               return_tensors="pt").to(self.device) for ix in
                           range(0, len(sub_x) // (self.mert_processor.sampling_rate * 60) + 1, 60)]
-            aggoutputs = torch.zeros(1, 25, 1024).cpu()
+            aggoutputs = torch.zeros(1, 25, 1024).to(self.device)
             for inputs in all_inputs:
                 with torch.no_grad():
                     outputs = self.mert_model(**inputs, output_hidden_states=True)
                 all_layer_hidden_states = torch.stack(outputs.hidden_states).squeeze()
-                sub_x = all_layer_hidden_states.mean(-2).unsqueeze(0).cpu()
+                sub_x = all_layer_hidden_states.mean(-2).unsqueeze(0)
                 aggoutputs += sub_x
             aggoutputs /= len(all_inputs)
             sub_x = self.mu_mert_agg(aggoutputs).squeeze()

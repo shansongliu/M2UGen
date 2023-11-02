@@ -1,7 +1,7 @@
 freeze_lm: true
 freeze_input_proj: false
 freeze_output_proj: true
-prompt: 'Describe the music in detail' # the prompting information for the enc-side alignment.
+prompt: '' # the prompting information for the enc-side alignment.
 train:
     warmup_rate: 0.1
     epochs: 1

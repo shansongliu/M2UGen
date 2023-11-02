@@ -34,7 +34,7 @@ class ViTEncoder(nn.Module):
         super().__init__()
         print(f'Initializing ViT encoder from {vit_path} ...')
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.vit_model = ViTModel.from_pretrained(vit_path)
+        self.vit_model = ViTModel.from_pretrained(vit_path).to(self.device)
         self.vit_model.eval()
         self.vit_processor = ViTImageProcessor.from_pretrained(vit_path)
         self.iu_vit_agg = nn.Conv1d(in_channels=197, out_channels=1, kernel_size=1)
@@ -62,7 +62,7 @@ class ViTEncoder(nn.Module):
     def encode_image(self, x) -> torch.Tensor:
         xs = []
         for sub_x in x:
-            inputs = self.vit_processor(images=sub_x, return_tensors="pt")
+            inputs = self.vit_processor(images=sub_x, return_tensors="pt").to(self.vit_model.device)
             with torch.no_grad():
                 outputs = self.vit_model(**inputs)
             last_hidden_states = outputs.last_hidden_state

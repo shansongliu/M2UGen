@@ -20,14 +20,14 @@ def load_dataset(args, dataset_name_list):
     sampler = torch.utils.data.RandomSampler(concat_data)
     batch_sampler = DistributedMultiDatasetBatchSampler(dataset=concat_data,
                                                         sampler=sampler,
-                                                        batch_size=1,
+                                                        batch_size=8,
                                                         drop_last=True,
                                                         rank=0,
                                                         world_size=1)
     iter_ = DataLoader(
         concat_data,
         batch_sampler=batch_sampler,
-        num_workers=1,
+        num_workers=8,
         collate_fn=concat_data.collate,
         pin_memory=True
     )

@@ -3,9 +3,9 @@ import os.path
 import torch
 import gc
 from header import *
+import numpy as np
 
-
-def adjust_learning_rate(optimizer, steps, base_lr=0.0004, min_lr=0, warmup_steps=10):
+def adjust_learning_rate(optimizer, steps, base_lr=0.01, min_lr=0.0001, warmup_steps=0):
     """Decay the learning rate with half-cycle cosine after warmup"""
     if steps < warmup_steps:
         lr = base_lr * steps / warmup_steps
@@ -31,13 +31,14 @@ class DeepSpeedAgent:
         self.writer = SummaryWriter(args['log_path'])
 
         self.load_parameters(self.args['save_path'])
-
+        self.losses = []
+        self.mle_acces = []
         # load config parameters of deepspeed
         # ds_params = json.load(open(self.args['ds_config_path']))
         # ds_params['scheduler']['params']['total_num_steps'] = self.args['total_steps']
         # ds_params['scheduler']['params']['warmup_num_steps'] = max(10, int(
         #     self.args['total_steps'] * self.args['warmup_rate']))
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=0.0004,
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=0.01,
                                            betas=(0.9, 0.95), eps=1e-8, weight_decay=0.001)
         self.optimizer.zero_grad()
         # self.ds_engine, self.optimizer, _, _ = deepspeed.initialize(
@@ -57,8 +58,12 @@ class DeepSpeedAgent:
     def train_model(self, batch, current_step=0, pbar=None):
         self.model.train()
         loss, mle_acc, mse_loss = self.model(batch)
-        loss /= 16
+        # loss /= 8
         loss.backward()
+        self.losses.append(loss.item())
+        self.losses = self.losses[-100:]
+        self.mle_acces.append(mle_acc)
+        self.mle_acces = self.mle_acces[-100:]
         self.writer.add_scalar('loss', loss, current_step)
         self.writer.add_scalar('mle_acc', mle_acc, current_step)
         # if isinstance(mse_loss, list):
@@ -71,17 +76,20 @@ class DeepSpeedAgent:
             pass
         # self.writer.add_scalar('mse_loss', mse_loss, current_step)
 
-        if (current_step + 1) % 16 == 0:
-            adjust_learning_rate(self.optimizer, current_step)
-            self.optimizer.zero_grad()
-            self.optimizer.step()
+        # if (current_step + 1) % 8 == 0:
+        #     adjust_learning_rate(self.optimizer, current_step)
+        #     self.optimizer.zero_grad()
+        #     self.optimizer.step()
+        adjust_learning_rate(self.optimizer, current_step + 1)
+        self.optimizer.zero_grad()
+        self.optimizer.step()
         # self.ds_engine.backward(loss)
         # self.ds_engine.step()
         # pbar.set_description(f'[!] loss: {round(loss.item(), 4)}; '
         #                      f'token_acc: {round(mle_acc * 100, 2)}; '
         #                      f'mse_loss: {round(mse_loss[0].item(), 4)} ')
-        pbar.set_description(f'[!] loss: {round(loss.item(), 4)}; '
-                             f'token_acc: {round(mle_acc * 100, 2)}')
+        pbar.set_description(f'[!] loss: {round(np.mean(self.losses).item(), 4)}; '
+                             f'token_acc: {round(np.mean(self.mle_acces).item() * 100, 2)}')
         pbar.update(1)
         if self.args['log_path'] and current_step % self.args['logging_step'] == 0:
             elapsed = pbar.format_dict['elapsed']
@@ -89,7 +97,7 @@ class DeepSpeedAgent:
             remaining = (pbar.total - pbar.n) / rate if rate and pbar.total else 0
             remaining = str(datetime.timedelta(seconds=remaining))
             logging.info(
-                f'[!] progress: {round(pbar.n / pbar.total, 5)}; remaining time: {remaining}; loss: {round(loss.item(), 4)}; token_acc: {round(mle_acc * 100, 2)}')
+                f'[!] progress: {round(pbar.n / pbar.total, 5)}; remaining time: {remaining}; loss: {round(np.mean(self.losses).item(), 4)}; token_acc: {round(np.mean(self.mle_acces).item() * 100, 2)}')
             # ; mse_loss: {round(mse_loss[0].item(), 4)}
         mle_acc *= 100
 
@@ -103,23 +111,26 @@ class DeepSpeedAgent:
         """
             this function also save the trainable parameters and specific name parameters
         """
-        param_grad_dic = {
-            k: v.requires_grad for (k, v) in self.model.named_parameters()
-        }
+        print(f'[!] saving model into {path}')
+        # param_grad_dic = {
+        #     k: v.requires_grad for (k, v) in self.model.named_parameters()
+        # }
         state_dict = self.model.state_dict()
-        checkpoint = OrderedDict()
-        for k, v in self.model.named_parameters():
-            if v.requires_grad:
-                checkpoint[k] = v
-            if 'gen_text_hidden_fcs' in k:
-                checkpoint[k] = v
-            if 'gen_text_hidden_fcs_video' in k:
-                checkpoint[k] = v
-            if 'gen_text_hidden_fcs_audio' in k:
-                checkpoint[k] = v
-            if 'llama_proj' in k:
-                checkpoint[k] = v
-        torch.save(checkpoint, f'{path}/pytorch_model.pt')
+        # checkpoint = OrderedDict()
+        # for k, v in self.model.named_parameters():
+        #     if v.requires_grad:
+        #         checkpoint[k] = v
+        #     if 'mu_mert' in k:
+        #         checkpoint[k] = v
+        #     if 'iu_vit' in k:
+        #         checkpoint[k] = v
+        #     if 'iu_vivit' in k:
+        #         checkpoint[k] = v
+        #     if 'gen_text_hidden_fcs_audio' in k:
+        #         checkpoint[k] = v
+        #     if 'llama_proj' in k:
+        #         checkpoint[k] = v
+        torch.save(state_dict, f'{path}/pytorch_model.pt')
         # save tokenizer
         self.model.llama_tokenizer.save_pretrained(path)
         # save configuration
@@ -147,18 +158,16 @@ class DeepSpeedAgent:
 
             if 'lora' in name:
                 lora += num_params
-            elif 'gen_text_hidden_fcs_video' in name:
+            elif 'iu_vivit' in name and param.requires_grad:
                 video += num_params
-            elif 'gen_text_hidden_fcs_audio' in name:
+            elif 'mu_mert' in name and param.requires_grad:
                 audio += num_params
-            elif 'gen_text_hidden_fcs' in name:
+            elif 'iu_vit' in name and param.requires_grad:
                 image += num_params
-            elif 'llama_proj' in name:
+            elif 'gen_text_hidden_fcs_audio' in name:
                 linear += num_params
             elif 'llama_model' in name:
                 llama += num_params
-            elif 'visual_encoder' in name:
-                imagebind += num_params
             else:
                 pass
 

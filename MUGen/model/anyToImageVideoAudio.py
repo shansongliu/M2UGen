@@ -1,6 +1,8 @@
 import logging
 import os.path
+from typing import List
 
+import numpy as np
 import torch
 import gc
 from header import *
@@ -15,7 +17,7 @@ from .encoders import *
 
 class StoppingCriteriaSub(StoppingCriteria):
 
-    def __init__(self, stops=[], encounters=1):
+    def __init__(self, stops: List = None, encounters: int = 1):
         super().__init__()
         self.stops = stops
         self.ENCOUNTERS = encounters
@@ -23,8 +25,12 @@ class StoppingCriteriaSub(StoppingCriteria):
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor):
         stop_count = 0
         for stop in self.stops:
-            # stop_count = torch.all((stop == input_ids[0][-len(stop):])).item()
-            stop_count = (stop == input_ids[0]).sum().item()
+            _stop = torch.tensor(stop).to(input_ids[0].device)
+            indices = torch.where(_stop[0] == input_ids)
+            for i in indices:
+                if len(i) > 0:
+                    if torch.all(input_ids[0][i:i + len(_stop)] == _stop):
+                        stop_count += 1
         if stop_count >= self.ENCOUNTERS:
             return True
         return False
@@ -49,8 +55,11 @@ class MUGen(nn.Module):
 
         print(f'Initializing Encoders ...')
         self.mert = MERTEncoder()
+        self.mert.to(self.device)
         self.vit = ViTEncoder()
+        self.vit.to(self.device)
         self.vivit = ViViTEncoder()
+        self.vivit.to(self.device)
         print('Encoders initialized.')
 
         vicuna_ckpt_path = "./ckpt/pretrained_ckpt/LLaMA-2/7B"  # os.path.join(self.args['pretrained_ckpt_path'], 'vicuna_ckpt', self.args['vicuna_version'])
@@ -141,19 +150,19 @@ class MUGen(nn.Module):
 
     def encode_video(self, video_paths):
         try:
-            inputs_llama = self.vivit(video_paths).to(self.device)   # bsz x 1 x llama_size
+            inputs_llama = self.vivit(video_paths)#.to(self.device)   # bsz x 1 x llama_size
         except:
             inputs_llama = torch.zeros((len(video_paths), 1, 4096)).to(self.device)
         atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(self.device)  # bsz x 1
         return inputs_llama, atts_llama
 
     def encode_audio(self, audio_paths):
-        inputs_llama = self.mert(audio_paths).to(self.device)   # bsz x 1 x llama_size
+        inputs_llama = self.mert(audio_paths)#.to(self.device)   # bsz x 1 x llama_size
         atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(self.device)  # bsz x 1
         return inputs_llama, atts_llama
 
     def encode_image(self, image_paths):
-        inputs_llama = self.vit(image_paths).to(self.device)  # bsz x 1 x llama_size
+        inputs_llama = self.vit(image_paths)#.to(self.device)  # bsz x 1 x llama_size
         atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(self.device)  # bsz x 1
         return inputs_llama, atts_llama
 
@@ -253,8 +262,7 @@ class MUGen(nn.Module):
                                                                           )
         elif stage == 3:
             input_ids, target_ids, attention_mask = process_batch_stage_3(self.llama_tokenizer, texts, self.max_length,
-                                                                          self.args['num_gen_audio_tokens']
-                                                                          )
+                                                                          self.args['num_gen_audio_tokens'])
         else:
             raise NotImplementedError
         inputs_embeds, targets, attention_mask = self.prompt_wrap(img_embeds, input_ids, target_ids, attention_mask)
@@ -720,6 +728,7 @@ class MUGen(nn.Module):
         return_outputs = []
 
         # Find up to max_num_rest [AUD] tokens, and their corresponding scores.
+        print('All ids: ', generated_ids)
         all_gen_aud_idx = [i for i, x in enumerate(generated_ids[0, :] == self.args['gen_audio_token_idx'][0]) if x][
                           :inputs['max_num_auds']]
         print('all_gen_aud_idx: ', all_gen_aud_idx)

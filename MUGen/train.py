@@ -6,7 +6,7 @@ from config import *
 
 def parser_args():
     parser = argparse.ArgumentParser(description='train parameters')
-    parser.add_argument('--model', type=str, default='nextgpt')
+    parser.add_argument('--model', type=str, default='mugen')
     parser.add_argument('--mode', type=str, default='train', help='train or test or validation')
     parser.add_argument('--dataset', type=str, default='cc3m', help='the dataset name, it could be cc3m, webvid, audiocap, instruction')
     parser.add_argument('--data_path', type=str, default='cc3m/cc3m.json')  # training data
@@ -84,8 +84,8 @@ def main(**args):
     #     train_iter_list.append(train_iter)
     train_data, train_iter, sampler = load_dataset(args, args['dataset_name_list'])
 
-    length = args['epochs'] * len(train_data)
-    total_steps = args['epochs'] * len(train_data)
+    length = int(args['epochs'] * len(train_data) / 8)
+    total_steps = int(args['epochs'] * len(train_data) / 8)
     args['total_steps'] = total_steps
     agent = load_model(args)
     # torch.distributed.barrier()
@@ -102,7 +102,7 @@ def main(**args):
                 pbar=pbar
             )
             current_step += 1
-            if current_step % 200 == 0:
+            if current_step % 250 == 0:
                 # torch.distributed.barrier()
                 agent.save_model(args['save_path'], current_step)
     # save at the end of the training
