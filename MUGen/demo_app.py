@@ -38,7 +38,7 @@ g_cuda = torch.Generator(device='cuda').manual_seed(1337)
 filter_value = -float('Inf')
 min_word_tokens = 10
 gen_scale_factor = 4.0
-stops_id = [[835], [2277, 29937]]
+stops_id = [[13]]
 ENCOUNTERS = 1
 load_sd = True
 generator = g_cuda

@@ -21,6 +21,7 @@ def parser_args():
     parser.add_argument('--max_length', type=int, default=512)  # the maximum input sequence length for LLMs
     parser.add_argument('--stage', type=int, default=1)  # the training stage
     parser.add_argument('--modality', type=list, default=['image', 'video', 'audio', 'text'])
+    parser.add_argument('--batch_size', type=int, default=8)
     return parser.parse_args()
 
 
@@ -50,7 +51,7 @@ def config_env(args):
     config = load_config(args)
     args.update(config)
     # initialize_distributed(args)
-    set_random_seed(args['seed'])
+    # set_random_seed(args['seed'])
 
 
 def build_directory(path):
@@ -84,8 +85,8 @@ def main(**args):
     #     train_iter_list.append(train_iter)
     train_data, train_iter, sampler = load_dataset(args, args['dataset_name_list'])
 
-    length = int(args['epochs'] * len(train_data) / 8)
-    total_steps = int(args['epochs'] * len(train_data) / 8)
+    length = int(args['epochs'] * len(train_iter))
+    total_steps = int(args['epochs'] * len(train_iter))
     args['total_steps'] = total_steps
     agent = load_model(args)
     # torch.distributed.barrier()
@@ -102,7 +103,7 @@ def main(**args):
                 pbar=pbar
             )
             current_step += 1
-            if current_step % 250 == 0:
+            if current_step % 500 == 0:
                 # torch.distributed.barrier()
                 agent.save_model(args['save_path'], current_step)
     # save at the end of the training

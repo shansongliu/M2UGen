@@ -5,6 +5,7 @@
 python3 train.py \
     --model mugen \
     --stage 1\
-    --save_path  ./ckpt/MUGen/7b_llama_v1\
-    --log_path ./ckpt/MUGen/7b_llama_v1/log
+    --batch_size 8\
+    --save_path  ./ckpt/MUGen/7b_llama_v2\
+    --log_path ./ckpt/MUGen/7b_llama_v2/log
 

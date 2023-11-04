@@ -1,3 +1,4 @@
+
 import numpy as np
 import os
 import sys
@@ -8,8 +9,8 @@ import json
 
 # Load a slightly modified version of the Stable Diffusion pipeline.
 # This allows us to extract text embeddings directly (without generating images).
-from transformers import AutoProcessor
-from model.musicgen.musicgen import MusicgenForConditionalGeneration
+from model.custom_ad import AudioLDMPipeline
+
 
 
 def save_to_path(emb, path):
@@ -24,7 +25,7 @@ def save_to_path(emb, path):
 
 if __name__ == '__main__':
 
-    batch_size = 1
+    batch_size = 128
 
     dtype = torch.float16 if torch.cuda.is_available() else torch.float32
     # clip_output_dir = './embed/'
@@ -41,7 +42,6 @@ if __name__ == '__main__':
     data_path = sys.argv[1]
     data_dir = sys.argv[2]
     clip_output_dir = sys.argv[3]
-    # SPLIT = sys.argv[4]
 
     if not os.path.exists(clip_output_dir):
         os.makedirs(clip_output_dir, exist_ok=True)
@@ -66,17 +66,9 @@ if __name__ == '__main__':
             if one_audio_name not in existing_files:
                 caption_list.append(one_caption)
                 name_list.append(os.path.join(data_dir, one_audio_name))
+    pipe = AudioLDMPipeline.from_pretrained("/hpctmp/e0589920/audioldm-l-full", torch_dtype=dtype)
+    pipe = pipe.to("cuda")
 
-    # sorted_list = [(x, y) for x, y in sorted(zip(name_list, caption_list))]
-    # caption_list = [y for _, y in sorted_list]
-    # name_list = [x for x, _ in sorted_list]
-    
-    # caption_list = caption_list[(SPLIT-1)*1000:SPLIT*1000]
-    # name_list = name_list[(SPLIT-1)*1000:SPLIT*1000]
-
-    processor = AutoProcessor.from_pretrained("/hpctmp/e0589920/MusicGen")
-    model = MusicgenForConditionalGeneration.from_pretrained("/hpctmp/e0589920/MusicGen")
-    model.to("cuda")
     print('Extract embeddings in batches.')
     num_batches = int(np.ceil(len(caption_list) / batch_size))
     for i in tqdm(range(num_batches)):
@@ -84,11 +76,7 @@ if __name__ == '__main__':
         end_idx = start_idx + batch_size
         batch_captions = caption_list[start_idx:end_idx]
         batch_ids = name_list[start_idx:end_idx]
-        inputs = processor(text=batch_captions, padding='max_length',
-                                max_length=1024, truncation=True, return_tensors="pt").to("cuda")
-                                  
-        prompt_embeds = model.generate(**inputs, guidance_scale=1, encoder_only=True).cpu().numpy()
-        # prompt_embeds = pipe(batch_captions, return_prompts_only=True).detach().cpu().numpy()
+        prompt_embeds = pipe(batch_captions, return_prompts_only=True).detach().cpu().numpy()
 
         # Save embeddings to disk in parallel.
         Parallel(n_jobs=8)(delayed(save_to_path)(

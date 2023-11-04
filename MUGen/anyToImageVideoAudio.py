@@ -9,7 +9,9 @@ from header import *
 from torch.cuda.amp import autocast
 from .modeling_llama import LlamaForCausalLM
 from transformers import StoppingCriteria, StoppingCriteriaList
-from transformers import MusicgenForConditionalGeneration
+from .musicgen.musicgen import MusicgenForConditionalGeneration
+from .audioldm2 import AudioLDM2Pipeline
+from transformers import AutoProcessor
 from .layers import *
 from .common.utils import *
 from .encoders import *
@@ -62,6 +64,19 @@ class MUGen(nn.Module):
         self.vivit.to(self.device)
         print('Encoders initialized.')
 
+        if self.stage != 1:
+            if self.args["generation_model"] == "musicgen":
+                print(f'Initialize MusicGen...')
+                self.generation_processor = AutoProcessor.from_pretrained("/hpctmp/e0589920/MusicGen")
+                self.generation_model = MusicgenForConditionalGeneration.from_pretrained("/hpctmp/e0589920/MusicGen",
+                                                                                    torch_dtype=torch.float16).to("cuda")
+                self.generation_model.eval()                                                         
+                print(f'MusicGen initialized...')
+            elif self.args["generation_model"] == "audioldm2":
+                self.generation_pipeline = AudioLDM2Pipeline.from_pretrained("/hpctmp/e0589920/audioldm2-music", torch_dtype=dtype).to("cuda")
+            else:
+                raise NotImplementedError
+
         vicuna_ckpt_path = "./ckpt/pretrained_ckpt/LLaMA-2/7B"  # os.path.join(self.args['pretrained_ckpt_path'], 'vicuna_ckpt', self.args['vicuna_version'])
         print(f'Initializing language decoder from {vicuna_ckpt_path} ...')
 
@@ -112,16 +127,16 @@ class MUGen(nn.Module):
                 in_dim = self.llama_model.config.hidden_size
 
                 self.gen_text_hidden_to_audio.append(
-                    TextFcLayer(in_dim, 8192,
+                    TextFcLayer(in_dim, 768,
                                 num_input_tokens=self.args['num_gen_audio_tokens'],
-                                num_output_tokens=1,
+                                num_output_tokens=self.args['num_output_tokens'],
                                 mode=self.args['text_fc_to_audio_mode']))
             # self.ad_pipe.text_encoder.config.projection_dim
             elif layer_idx < self.llama_model.config.num_hidden_layers:
                 self.gen_text_hidden_to_audio.append(
-                    TextFcLayer(self.llama_model.config.hidden_size, 8192,
+                    TextFcLayer(self.llama_model.config.hidden_size, 768,
                                 num_input_tokens=self.args['num_gen_audio_tokens'],
-                                num_output_tokens=1,
+                                num_output_tokens=self.args['num_output_tokens'],
                                 mode=self.args['text_fc_to_audio_mode']))
             else:
                 raise ValueError(
@@ -332,24 +347,33 @@ class MUGen(nn.Module):
                 input_embedding = torch.stack(input_embedding, dim=0)
                 hidden_states.append(fc_layer(hidden_embedding, input_embedding))  # (N, seq_len, 2048)
             embeddings = torch.stack(hidden_states, dim=-1).sum(dim=-1)  # (N, 77, 768)
-
             # embeddings = embeddings / embeddings.norm(dim=-1, keepdim=True)  # (N, T_I_V_A.txt, 256)
 
             # Obtain the embeddings produced by the text encoder of a frozen text-to-image generation model
             input_text = [conversation for conversation in texts]
-
-            text_prompt_embeddins = torch.stack(text_prompt_embeddins, dim=0).to(self.device)
-            assert len(text_prompt_embeddins.shape) == 2, (text_prompt_embeddins.shape, embeddings.shape)
-            text_prompt_embeddins = text_prompt_embeddins.view(text_prompt_embeddins.size(0), 1,
-                                                               text_prompt_embeddins.size(1))
-            print(embeddings.float().mean(), text_prompt_embeddins.float().mean())
+            if self.args["generation_model"] == "musicgen":
+                gen_inputs = self.generation_processor(text=text_prompt_embeddins, padding='max_length',
+                                        max_length=1024, truncation=True, return_tensors="pt").to(self.device)
+                text_prompt_embeddins = self.generation_model.generate(**gen_inputs, guidance_scale=1, encoder_only=True)
+                assert len(text_prompt_embeddins.shape) == 3, (text_prompt_embeddins.shape, embeddings.shape)
+            elif self.args["generation_model"] == "audioldm2":
+                text_prompt_embeddins = self.generation_pipeline(text_prompt_embeddins, return_prompts_only=True)
+                text_prompt_embeddins = torch.stack(text_prompt_embeddins, dim=0).to(self.device)
+                assert len(text_prompt_embeddins.shape) == 2, (text_prompt_embeddins.shape, embeddings.shape)
+                text_prompt_embeddins = text_prompt_embeddins.view(text_prompt_embeddins.size(0), 1,
+                                                                   text_prompt_embeddins.size(1))
+            else:
+                raise NotImplementedError
+                                                                   
+            # print(embeddings.float().mean(), text_prompt_embeddins.float().mean())
+            # exit(0)
             mse_loss = l2_loss(embeddings, text_prompt_embeddins)
             mse_loss = mse_loss.mean()
             loss += loss_scale * mse_loss
             del outputs, targets, inputs_embeds, attention_mask
             gc.collect()
             torch.cuda.empty_cache()
-            return loss, gen_acc, mse_loss
+            return loss * 10 * (1 - gen_acc), gen_acc, mse_loss
 
     def _enc_align_training_stage_1(self, inputs):
         """
@@ -382,7 +406,7 @@ class MUGen(nn.Module):
             labels=targets,
         )
 
-        loss = outputs.loss
+        loss = outputs.loss * 10
         # calculate the token accuracy
         chosen_tokens = torch.max(outputs.logits, dim=-1)[1][:, 1:-1]  # [B, S-1]
         labels = targets[:, 2:]
@@ -390,7 +414,7 @@ class MUGen(nn.Module):
         valid_mask = (labels != -100).reshape(-1)
         valid_tokens = gen_acc & valid_mask  # [B*S]
         gen_acc = valid_tokens.sum().item() / (valid_mask.sum().item() + 1.0)
-        return loss, gen_acc
+        return loss * (1 - gen_acc), gen_acc
 
     def _dec_align_training_stage_2(self, inputs):
         """
@@ -406,7 +430,7 @@ class MUGen(nn.Module):
                                                             text_hidden_fcs=self.gen_text_hidden_to_audio,
                                                             gen_token_idx=self.args['gen_audio_token_idx'],
                                                             text_emb_layers=self.args['text_emb_to_audio_layers'],
-                                                            text_prompt_embeddins=inputs['caption_embs'],
+                                                            text_prompt_embeddins=inputs['output_texts'],
                                                             stage=self.stage)
         else:
             raise NotImplementedError
@@ -428,7 +452,7 @@ class MUGen(nn.Module):
                                                             self.gen_text_hidden_to_audio,
                                                             self.args['gen_audio_token_idx'],
                                                             self.args['text_emb_to_audio_layers'],
-                                                            inputs['caption_embs'], stage=self.stage)
+                                                            inputs['caption_texts'], stage=self.stage)
         elif dataset_type == 'ImageToText':
             image_paths = inputs['mm_paths']
             img_embeds, _ = self.encode_image(image_paths)
@@ -450,7 +474,7 @@ class MUGen(nn.Module):
                                                      self.gen_text_hidden_to_audio,
                                                      self.args['gen_audio_token_idx'],
                                                      self.args['text_emb_to_audio_layers'],
-                                                     inputs['output_embs'], stage=self.stage)
+                                                     inputs['caption_texts'], stage=self.stage)
         elif dataset_type == "VideoToAudio":
             video_paths = inputs['input_paths']
             video_embeds, _ = self.encode_video(video_paths)
@@ -459,7 +483,7 @@ class MUGen(nn.Module):
                                                      self.gen_text_hidden_to_audio,
                                                      self.args['gen_audio_token_idx'],
                                                      self.args['text_emb_to_audio_layers'],
-                                                     inputs['output_embs'], stage=self.stage)
+                                                     inputs['caption_texts'], stage=self.stage)
         elif dataset_type == "AudioToAudio":
             audio_paths = inputs['input_paths']
             audio_embeds, _ = self.encode_audio(audio_paths)
@@ -468,7 +492,7 @@ class MUGen(nn.Module):
                                                      self.gen_text_hidden_to_audio,
                                                      self.args['gen_audio_token_idx'],
                                                      self.args['text_emb_to_audio_layers'],
-                                                     inputs['output_embs'], stage=self.stage)
+                                                     inputs['caption_texts'], stage=self.stage)
         else:
             raise NotImplementedError
         return loss, gen_acc, mse_loss
@@ -656,7 +680,7 @@ class MUGen(nn.Module):
         return out, audio_output_embedding
 
     def generate_audios(self, generated_ids, embeddings, all_gen_idx, generation_model=None,
-                        guidance_scale=7.5, num_inference_steps=40, audio_length_in_s=5.0):
+                        guidance_scale=1, num_inference_steps=40, audio_length_in_s=5.0):
         """
         To generate videos based on the embeddings
         generated_ids: the  index of the generated tokens
@@ -665,8 +689,6 @@ class MUGen(nn.Module):
         """
         return_outputs = []
         last_ret_idx = 0
-        generation_model = MusicgenForConditionalGeneration.from_pretrained(self.ad_ckpt_path,
-                                                                            torch_dtype=torch.float16).to("cuda")
         for gen_idx in all_gen_idx:
             assert generated_ids[0,
                    gen_idx:gen_idx + self.args['num_gen_audio_tokens']].cpu().detach().numpy().tolist() == \
@@ -687,10 +709,9 @@ class MUGen(nn.Module):
             hid_emb_size = gen_emb.shape[2]
             gen_emb = gen_emb.view(bs, hid_emb_size)
 
-            audio_outputs = generation_model(prompt_embeds=gen_emb,
+            audio_outputs = self.generation_model(encoder_outputs=gen_emb,
                                              guidance_scale=guidance_scale,
-                                             num_inference_steps=num_inference_steps,
-                                             audio_length_in_s=audio_length_in_s).audios[0]
+                                             max_new_tokens=int(audio_length_in_s * 256/10))[0]
             caption = \
                 self.llama_tokenizer.batch_decode(generated_ids[:, last_ret_idx:gen_idx], skip_special_tokens=True)[
                     0]

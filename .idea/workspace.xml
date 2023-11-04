@@ -9,18 +9,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/MUGen/model/musicgen/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MUGen/model/musicgen/musicgen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/config/base.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/config/base.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/config/stage_1.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/config/stage_1.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MUGen/config/stage_2.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/config/stage_2.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MUGen/config/stage_3.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/config/stage_3.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/dataset/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/dataset/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MUGen/dataset/catalog.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/dataset/catalog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MUGen/dataset/encoder_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/dataset/encoder_dataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/demo_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/demo_app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/model/agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/model/agent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/model/anyToImageVideoAudio.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/model/anyToImageVideoAudio.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MUGen/model/encoders/mert.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/model/encoders/mert.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MUGen/model/encoders/vit.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/model/encoders/vit.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MUGen/model/encoders/vivit.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/model/encoders/vivit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MUGen/model/layers.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/model/layers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MUGen/process_embeddings.py" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/process_embeddings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/scripts/train1.sh" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/scripts/train1.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/scripts/train2.sh" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/scripts/train2.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MUGen/scripts/train3.sh" beforeDir="false" afterPath="$PROJECT_DIR$/MUGen/scripts/train3.sh" afterDir="false" />

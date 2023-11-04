@@ -22,6 +22,8 @@ n_audio_tokens: 24
 text_emb_to_audio_layers: [-1]
 num_gen_audio_tokens: 24
 text_fc_to_audio_mode: transformer  # [qformer, transformer]
+generation_model: musicgen # [musicgen, audioldm2]
+num_output_tokens: 1024 # [1024, 1]
 
 # ========= image diffusion model ========== #
 image_diffusion: runwayml/stable-diffusion-v1-5 # [runwayml/stable-diffusion-v1-5, stabilityai/stable-diffusion-2]
