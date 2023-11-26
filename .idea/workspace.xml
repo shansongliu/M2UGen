@@ -9,9 +9,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/M2UGen/engine_train.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/M2UGen/main_train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/M2UGen/train.sh" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/train.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
