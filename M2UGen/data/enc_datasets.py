@@ -6,7 +6,7 @@ from transformers import LlamaTokenizer
 import copy
 import os
 import numpy as np
-from data.utils import *
+
 import torchaudio
 from PIL import Image
 import av

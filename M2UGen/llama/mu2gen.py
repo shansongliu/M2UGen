@@ -207,8 +207,8 @@ class MU2Gen(nn.Module):
 
         # 6. Generator
         print(f'Initialize MusicGen...')
-        self.generation_processor = AutoProcessor.from_pretrained("/hpctmp/e0589920/musicgen-small")
-        self.generation_model = MusicgenForConditionalGeneration.from_pretrained("/hpctmp/e0589920/musicgen-small")
+        self.generation_processor = AutoProcessor.from_pretrained("facebook/musicgen-small")
+        self.generation_model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-small")
         self.generation_model.eval()                                                         
         print(f'MusicGen initialized...')
 

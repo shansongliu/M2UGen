@@ -44,7 +44,7 @@ class FinetuneDataset(Dataset):
         if stage == 3:
             # QA Dataset
             musicqa = MusicQADataset("./Datasets/MusicQA/MusicQA.json",
-                                     "/hpctmp/e0589920/MU-LLaMA/MusicQA/MusicQA/audios", "AudioToText", tokenizer,
+                                     "./Datasets/MusicQA/audios", "AudioToText", tokenizer,
                                      max_words)
 
             # Text Instruction

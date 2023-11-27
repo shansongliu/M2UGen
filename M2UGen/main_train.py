@@ -37,12 +37,14 @@ def get_args_parser():
                         help='Type of LLaMA model')  #
     parser.add_argument('--llama_path', default='/path/to/llama', type=str,
                         help='path to LLaMA pretrained checkpoint')
-    parser.add_argument('--mert_path', default="/hpctmp/e0589920/MERT-v1-330M", type=str,
+    parser.add_argument('--mert_path', default="m-a-p/MERT-v1-330M", type=str,
                         help='path to MERT pretrained checkpoint')
-    parser.add_argument('--vit_path', default="/hpctmp/e0589920/ViT", type=str,
-                        help='path to MERT pretrained checkpoint')
-    parser.add_argument('--vivit_path', default="/hpctmp/e0589920/ViViT", type=str,
-                        help='path to MERT pretrained checkpoint')
+    parser.add_argument('--vit_path', default="google/vit-base-patch16-224-in21k", type=str,
+                        help='path to ViT pretrained checkpoint')
+    parser.add_argument('--vivit_path', default="google/vivit-b-16x2-kinetics400", type=str,
+                        help='path to ViViT pretrained checkpoint')
+    parser.add_argument('--musicgen_path', default="google/vivit-b-16x2-kinetics400", type=str,
+                        help='path to MusicGen pretrained checkpoint')
     parser.add_argument('--max_words', default=1024, type=int,
                         help='max number of input words')
 

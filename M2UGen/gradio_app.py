@@ -65,18 +65,6 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# args = {"model": "/hpctmp/e0589920/MU2Gen/ckpts/MU2Gen/checkpoint.pth", "llama_type": "7B", "llama_dir": "/hpctmp/e0589920/MU-LLaMA/MU-LLaMA/ckpts/LLaMA-2", 
-#         "mert_path": "/hpctmp/e0589920/MERT-v1-330M", "vit_path": "/hpctmp/e0589920/ViT", "vivit_path": "/hpctmp/e0589920/ViViT", 
-#         "knn_dir": "/hpctmp/e0589920/MU-LLaMA/MU-LLaMA/ckpts"} 
-
-# class dotdict(dict):
-#     """dot.notation access to dictionary attributes"""
-#     __getattr__ = dict.get
-#     __setattr__ = dict.__setitem__
-#     __delattr__ = dict.__delitem__
-
-# args = dotdict(args)
-
 llama_type = args.llama_type
 llama_ckpt_dir = os.path.join(args.llama_dir, llama_type)
 llama_tokenzier_path = args.llama_dir
