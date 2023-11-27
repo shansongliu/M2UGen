@@ -6,7 +6,7 @@ This is the official codebase for M<sup>2</sup>UGen.
 
 To train the M<sup>2</sup>UGen model, run the [**_train.sh_**](./train.sh) script. The script is designed to run traiing for all three stages.
 
-The main model architecture is given in [**_m2ugen.py_**](./llama/m2ugen.py).
+The main model architecture is given in [**_m2ugen.py_**](./llama/m2ugen.py) and the modified MusicGen architecture is present within the [**_musicgen_**](./llama/musicgen/) folder. The [**_data_**](./data/) folder contains the python files to handle loading and iterating through the dataset. The [**_data.py_**](./data/dataset.py) file will show the use of different datasets based on the training stage. The code for the training epochs are present in [**_engine_train.py_**](./engine_train.py).
 
 ## Model Testing
 
