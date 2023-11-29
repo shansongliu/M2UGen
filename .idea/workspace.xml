@@ -8,13 +8,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/engine_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/engine_train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/gradio_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/gradio_app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/llama/mu2gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/llama/m2ugen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/main_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/main_train.py" afterDir="false" />
-    </list>
+    <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
