@@ -1,36 +1,20 @@
-import argparse
-
-import gradio as gr
-import random
-
 import torch.cuda
 
-from copy import deepcopy
-import os
-import ipdb
 import gradio as gr
 import mdtex2html
-import os
-import json
 import tempfile
 from PIL import Image
 import scipy
-import librosa
-import imageio
 import argparse
-import time
-import random
 
-from llama.mu2gen import MU2Gen
+from llama.m2ugen import M2UGen
 import llama
-import json
 import numpy as np
 import os
-import time
-from pathlib import Path
 import torch
 import torchaudio
 import torchvision.transforms as transforms
+import av
 import subprocess
 import librosa
 
@@ -65,10 +49,12 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+generated_audio_files = []
+
 llama_type = args.llama_type
 llama_ckpt_dir = os.path.join(args.llama_dir, llama_type)
 llama_tokenzier_path = args.llama_dir
-model = MU2Gen(llama_ckpt_dir, llama_tokenzier_path, args, knn=False, stage=3)
+model = M2UGen(llama_ckpt_dir, llama_tokenzier_path, args, knn=False, stage=3)
 
 print("Loading Model Checkpoint")
 checkpoint = torch.load(args.model, map_location='cpu')
@@ -83,7 +69,9 @@ assert len(load_result.unexpected_keys) == 0, f"Unexpected keys: {load_result.un
 model.eval()
 model.to("cuda")
 
-transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0)==1 else x)])
+transform = transforms.Compose(
+    [transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0) == 1 else x)])
+
 
 def postprocess(self, y):
     if y is None:
@@ -97,6 +85,7 @@ def postprocess(self, y):
 
 
 gr.Chatbot.postprocess = postprocess
+
 
 def parse_text(text, image_path, video_path, audio_path):
     """copy from https://github.com/GaiZhenbiao/ChuanhuChatGPT/"""
@@ -142,11 +131,14 @@ def parse_text(text, image_path, video_path, audio_path):
     text = text[:-len("<br>")].rstrip() if text.endswith("<br>") else text
     return text, outputs
 
+
 def save_audio_to_local(audio, sec):
+    global generated_audio_files
     if not os.path.exists('temp'):
         os.mkdir('temp')
     filename = os.path.join('temp', next(tempfile._get_candidate_names()) + '.wav')
     scipy.io.wavfile.write(filename, rate=model.generation_model.config.audio_encoder.sampling_rate, data=audio)
+    generated_audio_files.append(filename)
     return filename
 
 
@@ -176,6 +168,7 @@ def parse_reponse(model_outputs, audio_length_in_s):
     response = response[:-len("<br>")].rstrip() if response.endswith("<br>") else response
     return response, text_outputs
 
+
 def reset_user_input():
     return gr.update(value='')
 
@@ -189,12 +182,14 @@ def reset_state():
     generated_audio_files = []
     return None, None, None, None, [], [], []
 
+
 def upload_image(conversation, chat_history, image_input):
     input_image = Image.open(image_input.name).resize(
         (224, 224)).convert('RGB')
     input_image.save(image_input.name)  # Overwrite with smaller image.
     conversation += [(f'<img src="./file={image_input.name}" style="display: inline-block;">', "")]
     return conversation, chat_history + [input_image, ""]
+
 
 def read_video_pyav(container, indices):
     frames = []
@@ -219,16 +214,19 @@ def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
     indices = np.clip(indices, start_idx, end_idx - 1).astype(np.int64)
     return indices
 
+
 def get_video_length(filename):
     result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                              "format=duration", "-of",
                              "default=noprint_wrappers=1:nokey=1", filename],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT)
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
     return int(round(float(result.stdout)))
+
 
 def get_audio_length(filename):
     return int(round(librosa.get_duration(path=filename)))
+
 
 def predict(
         prompt_input,
@@ -268,11 +266,11 @@ def predict(
         audio_length_in_s = get_audio_length(audio_path)
         generated_audio_files.append(audio_path)
         print(f"Audio Length: {audio_length_in_s}")
-        
+
     print(image, video, audio)
-    response = model.generate(prompts, audio, image, video, 512, temperature, top_p, audio_length_in_s=audio_length_in_s)
+    response = model.generate(prompts, audio, image, video, 512, temperature, top_p,
+                              audio_length_in_s=audio_length_in_s)
     print(response)
-    counter = (counter + 1) % len(responses)
     response_chat, response_outputs = parse_reponse(response, audio_length_in_s)
     print('text_outputs: ', response_outputs)
     user_chat, user_outputs = parse_text(prompt_input, image_path, video_path, audio_path)
@@ -282,7 +280,6 @@ def predict(
 
 
 with gr.Blocks() as demo:
-
     gr.HTML("""
         <h1 align="center" style=" display: flex; flex-direction: row; justify-content: center; font-size: 25pt; "><img src='./file=bot.png' width="50" height="50" style="margin-right: 10px;">M<sup style="line-height: 200%; font-size: 60%">2</sup>UGen</h1>
         <h3>This is the demo page of M<sup>2</sup>UGen, a Multimodal LLM capable of Music Understanding and Generation!</h3>
@@ -292,7 +289,9 @@ with gr.Blocks() as demo:
     with gr.Row():
         with gr.Column(scale=0.7, min_width=500):
             with gr.Row():
-                chatbot = gr.Chatbot(label='M2UGen Chatbot', avatar_images=((os.path.join(os.path.dirname(__file__), 'user.png')), (os.path.join(os.path.dirname(__file__), "bot.png")))).style(height=440)
+                chatbot = gr.Chatbot(label='M2UGen Chatbot', avatar_images=(
+                (os.path.join(os.path.dirname(__file__), 'user.png')),
+                (os.path.join(os.path.dirname(__file__), "bot.png")))).style(height=440)
 
             with gr.Tab("User Input"):
                 with gr.Row(scale=3):
@@ -300,11 +299,12 @@ with gr.Blocks() as demo:
                 with gr.Row(scale=3):
                     with gr.Column(scale=1):
                         # image_btn = gr.UploadButton("🖼️ Upload Image", file_types=["image"])
-                        image_path = gr.Image(type="filepath", label="Image")  # .style(height=200)  # <PIL.Image.Image image mode=RGB size=512x512 at 0x7F6E06738D90>
+                        image_path = gr.Image(type="filepath",
+                                              label="Image")  # .style(height=200)  # <PIL.Image.Image image mode=RGB size=512x512 at 0x7F6E06738D90>
                     with gr.Column(scale=1):
-                        audio_path = gr.Audio(type='filepath')  #.style(height=200)
+                        audio_path = gr.Audio(type='filepath')  # .style(height=200)
                     with gr.Column(scale=1):
-                        video_path = gr.Video()  #.style(height=200) # , value=None, interactive=True
+                        video_path = gr.Video()  # .style(height=200) # , value=None, interactive=True
         with gr.Column(scale=0.3, min_width=300):
             with gr.Group():
                 with gr.Accordion('Text Advanced Options', open=True):

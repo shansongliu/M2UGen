@@ -7,10 +7,10 @@ import torch
 import util.misc as misc
 import util.lr_sched as lr_sched
 
-from llama import MU2Gen
+from llama import M2UGen
 
 
-def train_one_epoch(model: MU2Gen,
+def train_one_epoch(model: M2UGen,
                     data_loader: Iterable, optimizer: torch.optim.Optimizer,
                     device: torch.device, epoch: int, loss_scaler,
                     log_writer=None,
@@ -81,22 +81,6 @@ def train_one_epoch(model: MU2Gen,
             metric_logger.update(lr=lr)
         except:
             continue
-        # print(c_loss_value, m_loss_value)
-        # loss_value_reduce = misc.all_reduce_mean(loss_value)
-        # c_loss_value_reduce = misc.all_reduce_mean(c_loss_value)
-        # if m_loss_value != 0:
-        #     m_loss_value_reduce = misc.all_reduce_mean(m_loss_value)
-        # print(loss_value_reduce, c_loss_value_reduce)
-        # if log_writer is not None and (data_iter_step + 1) % accum_iter == 0:
-        #     """ We use epoch_1000x as the x-axis in tensorboard.
-        #     This calibrates different curves when batch size changes.
-        #     """
-        #     epoch_1000x = int((data_iter_step / len(data_loader) + epoch) * 1000)
-        #     log_writer.add_scalar('c_train_loss', c_loss_value_reduce, epoch_1000x)
-        #     if m_loss_value != 0:
-        #         log_writer.add_scalar('m_train_loss', m_loss_value_reduce, epoch_1000x)
-        #     log_writer.add_scalar('lr', lr, epoch_1000x)
-        # print("DONE")
 
     # gather the stats from all processes
     metric_logger.synchronize_between_processes()

@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 
 import util.misc as misc
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
-from llama.mu2gen import MU2Gen
+from llama.mu2gen import M2UGen
 
 from data.dataset import FinetuneDataset
 
@@ -117,7 +117,7 @@ def main(args):
     llama_type = args.llama_type
     llama_ckpt_dir = os.path.join(args.llama_path, llama_type)
     llama_tokenzier_path = args.llama_path
-    model = MU2Gen(llama_ckpt_dir, llama_tokenzier_path, args, knn=False, stage=args.stage)
+    model = M2UGen(llama_ckpt_dir, llama_tokenzier_path, args, knn=False, stage=args.stage)
     # model.llama.to(device)
     # model.output_projector.to(device)
     # model.generation_model.to(device)

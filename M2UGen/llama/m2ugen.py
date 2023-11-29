@@ -2,7 +2,6 @@ import json
 import os
 from pathlib import Path
 import numpy as np
-from collections import defaultdict
 
 import torch
 import torch.nn as nn
@@ -23,7 +22,7 @@ from transformers import AutoProcessor
 import torchaudio
 
 
-class MU2Gen(nn.Module):
+class M2UGen(nn.Module):
     """ Masked Autoencoder with VisionTransformer backbone
     """
 
@@ -39,7 +38,7 @@ class MU2Gen(nn.Module):
         # https://huggingface.co/m-a-p/MERT-v1-330M
         # And set the mert_path argument to directory with the model files
         print(f'Initialize MERT...')
-        self.mert_model = AutoModel.from_pretrained(self.args.mert_path, trust_remote_code=True)#.to(self.device)
+        self.mert_model = AutoModel.from_pretrained(self.args.mert_path, trust_remote_code=True)  # .to(self.device)
         self.mert_processor = Wav2Vec2FeatureExtractor.from_pretrained(self.args.mert_path, trust_remote_code=True)
         self.mu_mert_agg = nn.Conv1d(in_channels=25, out_channels=1, kernel_size=1)
         self.mu_mert_proj = nn.Linear(1024, 4096)
@@ -71,7 +70,7 @@ class MU2Gen(nn.Module):
 
         # 2. ViT Encoder
         print(f'Initialize ViT...')
-        self.vit_model = ViTModel.from_pretrained(self.args.vit_path)#.to(self.device)
+        self.vit_model = ViTModel.from_pretrained(self.args.vit_path)  # .to(self.device)
         self.vit_model.eval()
         self.vit_processor = ViTImageProcessor.from_pretrained(self.args.vit_path)
         self.iu_vit_agg = nn.Conv1d(in_channels=197, out_channels=1, kernel_size=1)
@@ -95,7 +94,7 @@ class MU2Gen(nn.Module):
 
         # 3. ViViT Encoder
         print(f'Initialize ViViT...')
-        self.vivit_model = VivitModel.from_pretrained(self.args.vivit_path)#.to(self.device)
+        self.vivit_model = VivitModel.from_pretrained(self.args.vivit_path)  # .to(self.device)
         self.vivit_model.eval()
         self.vivit_processor = VivitImageProcessor.from_pretrained(self.args.vivit_path)
         self.iu_vivit_agg = nn.Conv1d(in_channels=3137, out_channels=1, kernel_size=1)
@@ -125,9 +124,10 @@ class MU2Gen(nn.Module):
             max_seq_len=1024, max_batch_size=1, w_bias=bias_lora, w_lora=bias_lora,
             **params)  # max_batch_size only affects inference
         print(f"model args: {self.model_args}")
-        
+
         # 5. tokenizer
-        self.tokenizer =  LlamaTokenizer.from_pretrained(llama_tokenizer)#Tokenizer(model_path=llama_tokenizer, num_aud_tokens=self.model_args.num_gen_audio_tokens)
+        self.tokenizer = LlamaTokenizer.from_pretrained(
+            llama_tokenizer)  # Tokenizer(model_path=llama_tokenizer, num_aud_tokens=self.model_args.num_gen_audio_tokens)
         self._add_audio_token()
         self.model_args.vocab_size = len(self.tokenizer)
 
@@ -135,7 +135,6 @@ class MU2Gen(nn.Module):
             torch.set_default_tensor_type(torch.cuda.HalfTensor)
         self.llama = Transformer(self.model_args)
         torch.set_default_tensor_type(torch.FloatTensor)
-        
 
         ckpts = sorted(Path(llama_ckpt_dir).glob("*.pth"))
 
@@ -180,6 +179,7 @@ class MU2Gen(nn.Module):
                     parameter.data[:-self.model_args.num_gen_audio_tokens, size * i: size * (i + 1)] = checkpoint[
                         parameter_name
                     ]
+                    parameter.data[-self.model_args.num_gen_audio_tokens:, :] = 1
             del checkpoint
         '''
         ckpts_dict = defaultdict(list)
@@ -187,12 +187,12 @@ class MU2Gen(nn.Module):
             ckpt = torch.load(ckpt, map_location='cpu')
             for key, val in ckpt.items():
                 ckpts_dict[key].append(val)
-        
+
         for key, val in ckpts_dict.items():
             ckpts_dict[key] = torch.cat(val, dim=-1)
 
         self.llama.load_state_dict(ckpts_dict, strict=False)
-        
+
         print(ckpts)
         for ckpt in ckpts:
             print(ckpt)
@@ -201,15 +201,15 @@ class MU2Gen(nn.Module):
         '''
 
         # 5. projector
-        self.output_projector = ProjectionLayer(4096,self.model_args.output_dim_tokens,
-                                num_input_tokens=self.model_args.num_gen_audio_tokens,
-                                num_output_tokens=self.model_args.num_output_tokens) 
+        self.output_projector = ProjectionLayer(4096, self.model_args.output_dim_tokens,
+                                                num_input_tokens=self.model_args.num_gen_audio_tokens,
+                                                num_output_tokens=self.model_args.num_output_tokens)
 
         # 6. Generator
         print(f'Initialize MusicGen...')
-        self.generation_processor = AutoProcessor.from_pretrained("facebook/musicgen-small")
-        self.generation_model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-small")
-        self.generation_model.eval()                                                         
+        self.generation_processor = AutoProcessor.from_pretrained("/hpctmp/e0589920/musicgen-small")
+        self.generation_model = MusicgenForConditionalGeneration.from_pretrained("/hpctmp/e0589920/musicgen-small")
+        self.generation_model.eval()
         print(f'MusicGen initialized...')
 
         # 4. prefix
@@ -233,39 +233,55 @@ class MU2Gen(nn.Module):
         trainable = {}
         if stage == 1:
             for name, para in self.named_parameters():
-                if name.startswith("mu_mert_"):
+                if "llama." in name:
+                    if 'norm' in name or 'bias' in name or 'lora' in name:
+                        trainable[name] = para
+                elif "mu_mert_" in name:
                     trainable[name] = para
-                elif name.startswith("iu_vivit_"):
+                elif "iu_vivit_" in name:
                     trainable[name] = para
-                elif name.startswith("iu_vit_"):
+                elif "iu_vit_" in name:
+                    trainable[name] = para
+                elif "prefix_query" in name:
+                    trainable[name] = para
+                elif "tok_embeddings" in name:
                     trainable[name] = para
         elif stage == 2:
             for name, para in self.named_parameters():
-                if name.startswith("output_projector"):
+                if "llama." in name:
+                    if 'norm' in name or 'bias' in name or 'lora' in name:
+                        trainable[name] = para
+                elif "output_projector" in name:
                     trainable[name] = para
-                elif name.startswith("prefix_query."):
+                elif "prefix_query" in name:
+                    trainable[name] = para
+                elif "tok_embeddings" in name:
                     trainable[name] = para
         elif stage == 3:
             for name, para in self.named_parameters():
-                if name.startswith("llama."):
+                if "llama." in name:
                     if 'norm' in name or 'bias' in name or 'lora' in name:
                         trainable[name] = para
-                elif name.startswith("mu_mert_"):
+                elif "mu_mert_" in name:
                     trainable[name] = para
-                elif name.startswith("iu_vivit_"):
+                elif "iu_vivit_" in name:
                     trainable[name] = para
-                elif name.startswith("iu_vit_"):
+                elif "iu_vit_" in name:
                     trainable[name] = para
-                elif name.startswith("output_projector"):
+                elif "output_projector" in name:
                     trainable[name] = para
-                elif name.startswith("prefix_query."):
+                elif "prefix_query" in name:
+                    trainable[name] = para
+                elif "tok_embeddings" in name:
                     trainable[name] = para
         return trainable
 
     def set_default_trainability(self, stage=1):
         for key, value in self.named_parameters():
             value.requires_grad = False
-        for key, value in self.get_trainable_params(stage).items():
+        trainable_params = self.get_trainable_params(stage)
+        print(f"Trainable Params: {trainable_params.keys()}")
+        for key, value in trainable_params.items():
             value.data = value.data.float()
             value.requires_grad = True
 
@@ -320,7 +336,7 @@ class MU2Gen(nn.Module):
             sub_x = self.iu_vit_agg(last_hidden_states.to(self.device)).squeeze()
             xs.append(sub_x)
         return torch.stack(xs, dim=0)
-        
+
     def encode_video(self, x):
         xs = []
         for sub_x in x:
@@ -467,14 +483,14 @@ class MU2Gen(nn.Module):
         mask = None
         mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device)
         mask = torch.triu(mask, diagonal=start_pos + 1).type_as(h)
-        
+
         music_output_embedding = []
         for layer in self.llama.layers[:-3 * self.query_layer]:
             h = layer(h, 0, freqs_cis, mask)
             music_output_embedding.append(h)
 
         prefix_query = self.prefix_query.weight.reshape(
-            self.query_layer*3, 1, 4096).unsqueeze(1)
+            self.query_layer * 3, 1, 4096).unsqueeze(1)
 
         prefix_index = 0
         if audio_feats is not None:
@@ -498,7 +514,7 @@ class MU2Gen(nn.Module):
                 h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
                 music_output_embedding.append(h)
                 prefix_index = prefix_index + 1
-        
+
         if video_feats is not None:
             for layer in self.llama.layers[-1 * self.query_layer:]:
                 h = layer(h, 0, freqs_cis, mask, video_feats + prefix_query[prefix_index])
@@ -512,7 +528,7 @@ class MU2Gen(nn.Module):
 
         h = self.llama.norm(h)
         output = self.llama.output(h[:, -1, :])
-        
+
         return output.float(), torch.cat(music_output_embedding[-1:], dim=1)
 
     def forward(self, tokens, labels, audios=None, imgs=None, videos=None, music_caption=None):
@@ -532,11 +548,10 @@ class MU2Gen(nn.Module):
         mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device)
         mask = torch.triu(mask, diagonal=0 + 1).type_as(h)
 
-
         for layer in self.llama.layers[:-3 * self.query_layer]:
             h = layer(h, 0, freqs_cis, mask)
         prefix_query = self.prefix_query.weight.reshape(
-            self.query_layer*3, 1, 4096).unsqueeze(1)
+            self.query_layer * 3, 1, 4096).unsqueeze(1)
 
         prefix_index = 0
         if audios is not None:
@@ -556,7 +571,7 @@ class MU2Gen(nn.Module):
             for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
                 h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
                 prefix_index = prefix_index + 1
-        
+
         if videos is not None:
             for layer in self.llama.layers[-1 * self.query_layer:]:
                 h = layer(h, 0, freqs_cis, mask, video_feats + prefix_query[prefix_index])
@@ -580,7 +595,7 @@ class MU2Gen(nn.Module):
 
         if music_caption is not None and any([mc != '' for mc in music_caption]):
             gen_inputs = self.generation_processor(text=music_caption, padding='max_length',
-                                            max_length=128, truncation=True, return_tensors="pt").to(self.device)
+                                                   max_length=128, truncation=True, return_tensors="pt").to(self.device)
             out_embed = self.generation_model.generate(**gen_inputs, guidance_scale=1, encoder_only=True)
             start_pos = (labels == self.audio_tokens[0]).nonzero(as_tuple=False)[:, 1].tolist()
             assert len(start_pos) != 0, (self.tokenizer.batch_decode(labels), music_caption)
@@ -589,7 +604,8 @@ class MU2Gen(nn.Module):
             input_embedding = []
             for b, s in enumerate(start_pos):
                 hidden_embedding.append(final_hidden[b, s:s + self.model_args.num_gen_audio_tokens, :])
-                input_embedding.append(self.llama.tok_embeddings(labels[b, s:s + self.model_args.num_gen_audio_tokens].to(self.device)))
+                input_embedding.append(
+                    self.llama.tok_embeddings(labels[b, s:s + self.model_args.num_gen_audio_tokens].to(self.device)))
             hidden_embedding = torch.stack(hidden_embedding, dim=0).to(self.device)
             input_embedding = torch.stack(input_embedding, dim=0).to(self.device)
             hidden_states.append(self.output_projector(hidden_embedding, input_embedding))
@@ -604,10 +620,13 @@ class MU2Gen(nn.Module):
     @torch.inference_mode()
     def generate_music(self, embeddings, audio_length_in_s):
         gen_prefix = ''.join([f'[AUD{i}]' for i in range(len(self.audio_tokens))])
-        gen_prefx_ids = self.tokenizer(gen_prefix, add_special_tokens=False, return_tensors="pt").input_ids.to(self.device)
+        gen_prefx_ids = self.tokenizer(gen_prefix, add_special_tokens=False, return_tensors="pt").input_ids.to(
+            self.device)
         gen_prefix_embs = self.llama.tok_embeddings(gen_prefx_ids)
         gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs)
-        audio_outputs = self.generation_model.generate(guidance_scale=1, max_new_tokens=int(256/5 * audio_length_in_s), encoder_outputs=(gen_emb,))
+        audio_outputs = self.generation_model.generate(guidance_scale=1,
+                                                       max_new_tokens=int(256 / 5 * audio_length_in_s),
+                                                       encoder_outputs=(gen_emb,))
         return audio_outputs[0][0].cpu().detach().numpy()
 
     @torch.inference_mode()
@@ -662,7 +681,8 @@ class MU2Gen(nn.Module):
         start_gather = 0
         for cur_pos in range(start_pos, total_len):
             with torch.cuda.amp.autocast():
-                logits, music_output_embedding = self.forward_inference(tokens[:, prev_pos:cur_pos], prev_pos, audio_feats, image_feats, video_feats)
+                logits, music_output_embedding = self.forward_inference(tokens[:, prev_pos:cur_pos], prev_pos,
+                                                                        audio_feats, image_feats, video_feats)
             if temperature > 0:
                 probs = torch.softmax(logits / temperature, dim=-1)
                 next_token = sample_top_p(probs, top_p)
@@ -706,11 +726,11 @@ class MU2Gen(nn.Module):
 
 
 def load(model_path, llama_dir, mert_path="m-a-p/MERT-v1-330M", device="cuda" if torch.cuda.is_available() else "cpu",
-         knn=False, knn_dir="./ckpts", llama_type="7B", stage="finetune"):
+         knn=False, knn_dir="./ckpts", llama_type="7B", stage=3):
     llama_ckpt_dir = os.path.join(llama_dir, llama_type)
     llama_tokenzier_path = llama_dir
 
-    # load MU2Gen weights and model_cfg
+    # load M2UGen weights and model_cfg
     print(f'Loading LLaMA-Adapter from {model_path}')
     adapter_ckpt = torch.load(model_path, map_location='cpu')
     model_cfg = adapter_ckpt.get('config', {})
@@ -718,7 +738,7 @@ def load(model_path, llama_dir, mert_path="m-a-p/MERT-v1-330M", device="cuda" if
     # The model files for MERT can be downloaded here in case of network issues:
     # https://huggingface.co/m-a-p/MERT-v1-330M
     # And set the MERT argument to directory with the model files
-    model = MU2Gen(
+    model = M2UGen(
         llama_ckpt_dir, llama_tokenzier_path, mert_path, knn=knn, knn_dir=knn_dir, stage=stage)
 
     load_result = model.load_state_dict(adapter_ckpt['model'], strict=False)
