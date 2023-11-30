@@ -1,6 +1,21 @@
-# M<sup>2</sup>UGen
+<div>
+  <h1>
+    M<sup>2</sup>UGen: Multi-modal Music Understanding <br/>and Generation with the Power of Large Language Models
+    <img src="./assets/logo.png" height=100px align="right"/>
+  </h1>
+</div>
 
-This is the official codebase for M<sup>2</sup>UGen.
+[![PWC](https://img.shields.io/badge/%F0%9F%93%8E%20arXiv-Paper-red)](https://arxiv.org/abs/2311.11255)
+
+This is the official repository for *[M<sup>2</sup>UGen: Multi-modal Music Understanding and Generation with the Power of Large Language Models](https://arxiv.org/abs/2308.11276)*
+
+## Introduction
+
+The M<sup>2</sup>UGen model is a Music Understanding and Generation model that is capable of Music Question Answering and also Music Generation from texts, images, videos and audios. The model utilizes encoders such as MERT for music understanding, ViT for image understanding and ViViT for video understanding and the MusicGen model as the music generation model, coupled with adapters and the LLaMA model to make the model possible.
+
+<p align="center">
+  <img src="./assets/M2UGen.png">
+</p>
 
 ## Model Training
 
