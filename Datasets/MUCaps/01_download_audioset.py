@@ -75,4 +75,4 @@ if __name__ == "__main__":
 
     df = df.iloc[ids]
     print(f"Total Count: {len(df['YTID'].unique())}")
-    download_ps(df["YTID"].unique()[80000:], "./audioset_full")
+    download_ps(df["YTID"].unique()[:20000], "./audioset_full")
