@@ -9,12 +9,13 @@ import os
 
 SAMPLING_RATE = 16000
 
-fileset = [str(x) for x in Path("./MUCaps/audios").glob("*.mp3")]
+fileset = [str(x) for x in Path("./MUCaps/audioset_full").glob("*.mp3")]
 
 print("Loading Model...")
 
-model, utils = torch.hub.load(repo_or_dir='/home/svu/e0589920/.cache/torch/hub/snakers4_silero-vad_master',
-                              model='silero_vad', source='local')
+model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
+                              model='silero_vad',
+                              force_reload=True)
 device = torch.device('cuda:0')
 model.to(device)
 
@@ -68,13 +69,13 @@ else:
 for music in tqdm(fileset):
     if music in done_fileset:
         if os.path.exists(music):
-           if not (music_data[music]["snr"] and music_data[music]["snr"] >=10):
+            if not (music_data[music]["snr"] and music_data[music]["snr"] >=10):
                os.remove(music)
         continue
     mf = MusicFilter(music)
     music_data[music] = mf.get_results()
     if not mf.valid:
-       os.remove(music)
+        os.remove(music)
     if count % 10 == 0:
         with open('./MUCaps/music_filter.json', 'w') as f:
             json.dump(music_data, f)
