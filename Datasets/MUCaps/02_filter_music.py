@@ -9,7 +9,7 @@ import os
 
 SAMPLING_RATE = 16000
 
-fileset = [str(x) for x in Path("./MUCaps/audioset_full").glob("*.mp3")]
+fileset = [str(x) for x in Path("./audioset_full").glob("*.mp3")]
 
 print("Loading Model...")
 
@@ -59,8 +59,8 @@ music_data = {}
 done_fileset = set()
 count = 0
 
-if os.path.exists("./MUCaps/music_filter.json"):
-    music_data = json.load(open('./MUCaps/music_filter.json', 'r'))
+if os.path.exists("./music_filter.json"):
+    music_data = json.load(open('./music_filter.json', 'r'))
     done_fileset = set(music_data.keys())
     print("Continuing Music Filter...")
 else:
@@ -77,8 +77,8 @@ for music in tqdm(fileset):
     if not mf.valid:
         os.remove(music)
     if count % 10 == 0:
-        with open('./MUCaps/music_filter.json', 'w') as f:
+        with open('./music_filter.json', 'w') as f:
             json.dump(music_data, f)
 
-with open('./MUCaps/music_filter.json', 'w') as f:
+with open('./music_filter.json', 'w') as f:
     json.dump(music_data, f)
