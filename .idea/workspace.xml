@@ -9,9 +9,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Datasets/common/mpt.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datasets/common/mullama.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUEdit/02_find_matches.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUEdit/03_caption_music.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUEdit/04_generate_instructions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/03_caption_music.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUCaps/03_caption_music.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

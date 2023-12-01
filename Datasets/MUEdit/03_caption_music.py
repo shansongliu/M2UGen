@@ -1,25 +1,26 @@
-import sys
-import torch.cuda
-import os
-from pathlib import Path
-from tqdm.auto import tqdm
 import json
-
+import sys
+import os
+from tqdm.auto import tqdm
+import torch
 sys.path.append('../common')
 
 from mullama import qa_bot
 
-model = llama.load("../../MU-LLaMA/ckpts/checkpoint.pth",
-                   "../../M2UGen/ckpts/LLaMA-2",
-                   knn=True, knn_dir="../../M2UGen/ckpts/knn.index", llama_type="7B")
-model.eval()
+pairs = set([tuple(x) for x in json.load(open("ValidPairs.json", "r"))])
+fileset = set()
 
-fileset = sorted([str(x) for x in Path(r'./audioset_full').glob('*.mp3')])
+for a, b in pairs:
+    fileset.add(a)
+    fileset.add(b)
+
+fileset = list(fileset)
+
 caption_data = {}
 done_fileset = set()
 
-if os.path.exists(f"./MuCapsCaptions.json"):
-    caption_data = json.load(open(f'./MuCapsCaptions.json', 'r'))
+if os.path.exists(f"./MuEditCaptions.json"):
+    caption_data = json.load(open(f'./MuEditCaptions.json', 'r'))
     done_fileset = set([f"audioset_full/" + x for x in caption_data.keys()])
 
 count = 0
@@ -37,8 +38,8 @@ for file in fileset:
     caption_data[file.split('/')[-1]] = caption
     count += 1
     if count % 10 == 0:
-        with open(f'./MuCapsCaptions.json', 'w') as f:
+        with open(f'./MuEditCaptions.json', 'w') as f:
             json.dump(caption_data, f)
 
-with open(f'./MuCapsCaptions.json', 'w') as f:
+with open(f'./MuEditCaptions.json', 'w') as f:
     json.dump(caption_data, f)
