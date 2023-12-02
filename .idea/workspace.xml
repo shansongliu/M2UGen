@@ -9,9 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/M2UGen/train_musicgen.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/llama/audioldm2/pipeline_audioldm2.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/llama/audioldm2/pipeline_audioldm2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/llama/m2ugen.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/llama/m2ugen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/M2UGen/train.sh" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/train_audioldm2.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,17 +40,17 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/Users/atinsaki/Desktop/NUS/Work/M2UGen/Datasets/MUVideo",
+    "last_opened_file_path": "/Users/atinsaki/Desktop/NUS/Work/M2UGen/M2UGen",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/M2UGen" />
       <recent name="$PROJECT_DIR$/Datasets/MUVideo" />
       <recent name="$PROJECT_DIR$/assets" />
       <recent name="$PROJECT_DIR$/MUGen" />
       <recent name="$PROJECT_DIR$/model/encoders" />
-      <recent name="$PROJECT_DIR$/dataset" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Datasets/common" />
