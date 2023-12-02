@@ -609,9 +609,20 @@ class M2UGen(nn.Module):
             c_loss = self.criterion(output.reshape(-1, self.llama.vocab_size), labels.flatten().to(self.device))
 
         if music_caption is not None and any([mc != '' for mc in music_caption]):
-            gen_inputs = self.generation_processor(text=music_caption, padding='max_length',
-                                                   max_length=128, truncation=True, return_tensors="pt").to(self.device)
-            out_embed = self.generation_model.generate(**gen_inputs, guidance_scale=1, encoder_only=True)
+            if self.music_decoder == "audioldm2":
+                prompt_embeds, generated_prompt_embeds = self.generation_model(prompt=list(music_caption),
+                                                                               guidance_scale=1,
+                                                                               return_prompts_only=True)
+                prompt_embeds = prompt_embeds.reshape(prompt_embeds.shape[0], -1)
+                generated_prompt_embeds = generated_prompt_embeds.reshape(generated_prompt_embeds.shape[0], -1)
+                out_embed = torch.cat([prompt_embeds, generated_prompt_embeds], dim=1)
+                out_embed = 10 * out_embed.view(out_embed.size(0), 1, out_embed.size(1)).to(self.device)
+            else:
+                gen_inputs = self.generation_processor(text=music_caption, padding='max_length',
+                                                       max_length=128, truncation=True, return_tensors="pt").to(
+                    self.device)
+                out_embed = 10 * self.generation_model.generate(**gen_inputs, guidance_scale=1, encoder_only=True)
+                del gen_inputs
             start_pos = (labels == self.audio_tokens[0]).nonzero(as_tuple=False)[:, 1].tolist()
             assert len(start_pos) != 0, (self.tokenizer.batch_decode(labels), music_caption)
             hidden_states = []
@@ -638,11 +649,21 @@ class M2UGen(nn.Module):
         gen_prefx_ids = self.tokenizer(gen_prefix, add_special_tokens=False, return_tensors="pt").input_ids.to(
             self.device)
         gen_prefix_embs = self.llama.tok_embeddings(gen_prefx_ids)
-        gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs)
-        audio_outputs = self.generation_model.generate(guidance_scale=1,
-                                                       max_new_tokens=int(256 / 5 * audio_length_in_s),
-                                                       encoder_outputs=(gen_emb,))
-        return audio_outputs[0][0].cpu().detach().numpy()
+        if self.music_decoder == "audioldm2":
+            gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs) / 10
+            prompt_embeds, generated_prompt_embeds = gen_emb[:, :4 * 1024], gen_emb[:, 4 * 1024:]
+            prompt_embeds = prompt_embeds.reshape(prompt_embeds.shape[0], 4, 1024)
+            generated_prompt_embeds = generated_prompt_embeds.reshape(generated_prompt_embeds.shape[0], 8, 768)
+            audio_outputs = self.generation_model(prompt_embeds=prompt_embeds,
+                                                  generated_prompt_embeds=generated_prompt_embeds,
+                                                  audio_length_in_s=audio_length_in_s).audios
+            return audio_outputs
+        else:
+            gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs) / 10
+            audio_outputs = self.generation_model.generate(guidance_scale=1,
+                                                           max_new_tokens=int(256 / 5 * audio_length_in_s),
+                                                           encoder_outputs=(gen_emb,))
+            return audio_outputs[0][0].cpu().detach().numpy()
 
     @torch.inference_mode()
     def generate(
