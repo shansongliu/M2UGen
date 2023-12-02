@@ -9,18 +9,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/01_download_audioset.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/02_caption_music.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/03_caption_image.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/04_generate_instructions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUVideo/01_download_audioset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUVideo/02_caption_music.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUVideo/03_caption_video.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUVideo/04_generate_instructions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/01_download_audioset.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUCaps/01_download_audioset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/03_caption_music.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUCaps/03_caption_music.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/audioset.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/ontology.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datasets/MUEdit/01_download_audioset.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUEdit/01_download_audioset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datasets/MUEdit/03_caption_music.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUEdit/03_caption_music.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Datasets/MUEdit/filtered.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/common/filtered.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,21 +38,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/atinsaki/Desktop/NUS/Work/M2UGen/assets&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/Users/atinsaki/Desktop/NUS/Work/M2UGen/Datasets/MUVideo",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Datasets/MUVideo" />
       <recent name="$PROJECT_DIR$/assets" />
       <recent name="$PROJECT_DIR$/MUGen" />
       <recent name="$PROJECT_DIR$/model/encoders" />
       <recent name="$PROJECT_DIR$/dataset" />
-      <recent name="$PROJECT_DIR$/scripts" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Datasets/common" />
