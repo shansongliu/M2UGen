@@ -12,6 +12,7 @@ from .projector import ProjectionLayer
 from util.misc import download
 from .utils import sample_top_p
 from .musicgen.musicgen import MusicgenForConditionalGeneration
+from .audioldm2 import AudioLDM2Pipeline
 
 from transformers import LlamaTokenizer
 from transformers import Wav2Vec2FeatureExtractor, AutoModel
@@ -120,9 +121,17 @@ class M2UGen(nn.Module):
         with open(os.path.join(llama_ckpt_dir, "params.json"), "r") as f:
             params = json.loads(f.read())
         bias_lora = True
-        self.model_args: ModelArgs = ModelArgs(
-            max_seq_len=1024, max_batch_size=1, w_bias=bias_lora, w_lora=bias_lora,
-            **params)  # max_batch_size only affects inference
+
+        if self.args.music_decoder.lower() == "audioldm2":
+            self.model_args: ModelArgs = ModelArgs(
+                max_seq_len=1024, max_batch_size=1, w_bias=bias_lora, w_lora=bias_lora,
+                num_output_tokens=1, output_dim_tokens=512,
+                **params)  # max_batch_size only affects inference
+        else:
+            self.model_args: ModelArgs = ModelArgs(
+                max_seq_len=1024, max_batch_size=1, w_bias=bias_lora, w_lora=bias_lora,
+                num_output_tokens=128, output_dim_tokens=768,
+                **params)  # max_batch_size only affects inference
         print(f"model args: {self.model_args}")
 
         # 5. tokenizer
@@ -206,11 +215,17 @@ class M2UGen(nn.Module):
                                                 num_output_tokens=self.model_args.num_output_tokens)
 
         # 6. Generator
-        print(f'Initialize MusicGen...')
-        self.generation_processor = AutoProcessor.from_pretrained("/hpctmp/e0589920/musicgen-small")
-        self.generation_model = MusicgenForConditionalGeneration.from_pretrained("/hpctmp/e0589920/musicgen-small")
-        self.generation_model.eval()
-        print(f'MusicGen initialized...')
+        if self.args.music_decoder.lower() == "audioldm2":
+            print(f'Initialize AudioLDM2...')
+            self.generation_model = AudioLDM2Pipeline.from_pretrained("cvssp/audioldm2-music")
+            print(f'AudioLDM2 initialized...')
+        else:
+            print(f'Initialize MusicGen...')
+            self.generation_processor = AutoProcessor.from_pretrained("facebook/musicgen-medium")
+            self.generation_model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-medium")
+            self.generation_model.eval()
+            print(f'MusicGen initialized...')
+        self.music_decoder = self.args.music_decoder.lower()
 
         # 4. prefix
         self.query_layer = 6

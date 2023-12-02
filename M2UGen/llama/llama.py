@@ -28,9 +28,9 @@ class ModelArgs:
     w_lora: bool = True  # use lora tuning
     lora_rank: int = 16
 
-    num_output_tokens = 128
-    output_dim_tokens = 768
-    num_gen_audio_tokens = 8
+    num_output_tokens: int = 128
+    output_dim_tokens: int = 768
+    num_gen_audio_tokens: int = 8
 
 
 class RMSNorm(torch.nn.Module):
