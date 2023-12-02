@@ -9,11 +9,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Datasets/MUEdit/02_find_matches.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datasets/MUEdit/03_caption_music.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Datasets/MUEdit/04_generate_instructions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/01_download_audioset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/02_caption_music.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/03_caption_image.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Datasets/MUImage/04_generate_instructions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/01_download_audioset.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUCaps/01_download_audioset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/03_caption_music.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUCaps/03_caption_music.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/audioset.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/MUCaps/ontology.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/MUEdit/01_download_audioset.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUEdit/01_download_audioset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/MUEdit/03_caption_music.py" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/MUEdit/03_caption_music.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Datasets/MUEdit/filtered.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Datasets/common/filtered.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,6 +62,7 @@
       <recent name="$PROJECT_DIR$/scripts" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Datasets/common" />
       <recent name="$PROJECT_DIR$/Datasets" />
       <recent name="$PROJECT_DIR$/assets" />
       <recent name="$PROJECT_DIR$/dataset" />

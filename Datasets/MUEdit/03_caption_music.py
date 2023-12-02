@@ -19,9 +19,9 @@ fileset = list(fileset)
 caption_data = {}
 done_fileset = set()
 
-if os.path.exists(f"./MuEditCaptions.json"):
-    caption_data = json.load(open(f'./MuEditCaptions.json', 'r'))
-    done_fileset = set([f"audioset_full/" + x for x in caption_data.keys()])
+if os.path.exists(f"./MUEditCaptions.json"):
+    caption_data = json.load(open(f'./MUEditCaptions.json', 'r'))
+    done_fileset = set([f"audioset/" + x for x in caption_data.keys()])
 
 count = 0
 
@@ -38,8 +38,8 @@ for file in fileset:
     caption_data[file.split('/')[-1]] = caption
     count += 1
     if count % 10 == 0:
-        with open(f'./MuEditCaptions.json', 'w') as f:
+        with open(f'./MUEditCaptions.json', 'w') as f:
             json.dump(caption_data, f)
 
-with open(f'./MuEditCaptions.json', 'w') as f:
+with open(f'./MUEditCaptions.json', 'w') as f:
     json.dump(caption_data, f)
