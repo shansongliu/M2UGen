@@ -66,6 +66,16 @@ For model with AudioLDM2
 python gradio_app.py --model ./ckpts/M2UGen-AudioLDM2 --llama_dir ./ckpts/LLaMA-2 --music_decoder audioldm2
 ```
 
+## Dataset Generation
+
+We use the [MU-LLaMA](https://github.com/crypto-code/MU-LLaMA) and [MPT-7B](https://huggingface.co/mosaicml/mpt-7b-chat) models to generate the MUCaps, MUEdit, MUImge and MUVideo datasets. For each of the datasets, run the scripts in the order it is numbered to generate the datasets.
+
+The datasets are also available for download here:
+- [MUCaps](https://huggingface.co/datasets/M2UGen/MUCaps)
+- [MUEdit](https://huggingface.co/datasets/M2UGen/MUEdit)
+- [MUImage](https://huggingface.co/datasets/M2UGen/MUImage)
+- [MUVideo](https://huggingface.co/datasets/M2UGen/MUVideo)
+
 ## Model Training
 
 To train the M<sup>2</sup>UGen model, run the [**_train_musicgen.sh_**](./M2UGen/train_musicgen.sh) or [**_train_audioldm2.sh_**](./M2UGen/train_audioldm2.sh) script. The scripts are designed to train the model for all three stages with [MusicGen](https://huggingface.co/docs/transformers/model_doc/musicgen) and [AudioLDM2](https://huggingface.co/docs/diffusers/main/en/api/pipelines/audioldm2) music decoders respectively.
