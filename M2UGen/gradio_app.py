@@ -47,6 +47,10 @@ parser.add_argument(
     "--knn_dir", default="./ckpts", type=str,
     help="Path to directory with KNN Index",
 )
+parser.add_argument(
+    '--music_decoder', default="musicgen", type=str,
+    help='Decoder to use musicgen/audioldm2')
+
 args = parser.parse_args()
 
 generated_audio_files = []

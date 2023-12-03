@@ -43,8 +43,8 @@ def get_args_parser():
                         help='path to ViT pretrained checkpoint')
     parser.add_argument('--vivit_path', default="google/vivit-b-16x2-kinetics400", type=str,
                         help='path to ViViT pretrained checkpoint')
-    parser.add_argument('--musicgen_path', default="google/vivit-b-16x2-kinetics400", type=str,
-                        help='path to MusicGen pretrained checkpoint')
+    parser.add_argument('--music_decoder', default="musicgen", type=str,
+                        help='Decoder to use musicgen/audioldm2')
     parser.add_argument('--max_words', default=1024, type=int,
                         help='max number of input words')
 
