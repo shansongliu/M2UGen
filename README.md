@@ -1,7 +1,7 @@
 <p>
   <h1>
     <img src="./assets/logo.png" height=120px align="right"/>
-    M<sup>2</sup>UGen: Multi-modal Music Understanding and Generation with the Power of<br/> Large Language Models
+    M<sup>2</sup>UGen: Multi-modal Music Understanding and Generation with the Power of Large Language Models
   </h1>
 </p>
 
