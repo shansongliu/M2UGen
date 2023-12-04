@@ -121,12 +121,10 @@ This code contains elements from the following repo:
 ## Cite our work
 If you find this repo useful, please consider citing: 
 ```bibtex
-@misc{hussain2023m2ugen,
-      title={M$^{2}$UGen: Multi-modal Music Understanding and Generation with the Power of Large Language Models}, 
-      author={Atin Sakkeer Hussain and Shansong Liu and Chenshuo Sun and Ying Shan},
-      year={2023},
-      eprint={2311.11255},
-      archivePrefix={arXiv},
-      primaryClass={cs.SD}
+@article{hussain2023m,
+         title={M $\^{}$\{$2$\}$ $ UGen: Multi-modal Music Understanding and Generation with the Power of Large Language Models},
+         author={Hussain, Atin Sakkeer and Liu, Shansong and Sun, Chenshuo and Shan, Ying},
+         journal={arXiv preprint arXiv:2311.11255},
+         year={2023}
 }
 ```
