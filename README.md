@@ -80,7 +80,7 @@ The datasets are also available for download here:
 
 To train the M<sup>2</sup>UGen model, run the [**_train_musicgen.sh_**](./M2UGen/train_musicgen.sh) or [**_train_audioldm2.sh_**](./M2UGen/train_audioldm2.sh) script. The scripts are designed to train the model for all three stages with [MusicGen](https://huggingface.co/docs/transformers/model_doc/musicgen) and [AudioLDM2](https://huggingface.co/docs/diffusers/main/en/api/pipelines/audioldm2) music decoders respectively.
 
-The main model architecture is given in [**_m2ugen.py_**](./M2UGen/llama/m2ugen.py) and the modified MusicGen and AudioLDM2 architectures are present within the [**_musicgen_**](./M2UGen/llama/musicgen/) and [**_audioldm2_**](./M2UGen/llama/audioldm2/) folders respectively. The [**_data_**](./M2UGen/data/) folder contains the python files to handle loading the dataset. The [**_data.py_**](./M2UGen/data/dataset.py) file will show the use of different datasets based on the training stage. The code for the training epochs are present in [**_engine_train.py_**](./M2UGen/engine_train.py).
+The main model architecture is given in [**_m2ugen.py_**](./M2UGen/llama/m2ugen.py) and the modified MusicGen and AudioLDM2 architectures are present within the [**_musicgen_**](./M2UGen/llama/musicgen/) and [**_audioldm2_**](./M2UGen/llama/audioldm2/) folders respectively. The [**_data_**](./M2UGen/data/) folder contains the python files to handle loading the dataset. The [**_dataset.py_**](./M2UGen/data/dataset.py) file will show the use of different datasets based on the training stage. The code for the training epochs are present in [**_engine_train.py_**](./M2UGen/engine_train.py).
 
 ## Model Testing
 
