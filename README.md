@@ -68,7 +68,7 @@ python gradio_app.py --model ./ckpts/M2UGen-AudioLDM2 --llama_dir ./ckpts/LLaMA-
 
 ## Dataset Generation
 
-We use the [MU-LLaMA](https://github.com/crypto-code/MU-LLaMA) and [MPT-7B](https://huggingface.co/mosaicml/mpt-7b-chat) models to generate the MUCaps, MUEdit, MUImge and MUVideo datasets. For each of the datasets, run the scripts in the order it is numbered to generate the datasets.
+We use the [MU-LLaMA](https://github.com/crypto-code/MU-LLaMA) and [MPT-7B](https://huggingface.co/mosaicml/mpt-7b-chat) models to generate the MUCaps, MUEdit, MUImge and MUVideo datasets. For each of the datasets, run the scripts in the folder [**Datasets**](./M2UGen/tree/main/Datasets) in its numbered order to generate the datasets.
 
 The datasets are also available for download here:
 - [MUCaps](https://huggingface.co/datasets/M2UGen/MUCaps)
