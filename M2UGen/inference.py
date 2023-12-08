@@ -1,7 +1,5 @@
 import torch.cuda
 
-import gradio as gr
-import mdtex2html
 import tempfile
 from PIL import Image
 import scipy
@@ -51,6 +49,24 @@ parser.add_argument(
     '--music_decoder', default="musicgen", type=str,
     help='Decoder to use musicgen/audioldm2')
 
+# Input Arguments
+parser.add_argument(
+    "--prompt", default="Generate a music", type=str,
+    help="Input Prompt to the M2UGen model",
+)
+parser.add_argument(
+    "--audio_file", default=None, type=str,
+    help="Input Audio File to the M2UGen model",
+)
+parser.add_argument(
+    "--image_file", default=None, type=str,
+    help="Input Image File to the M2UGen model",
+)
+parser.add_argument(
+    "--video_file", default=None, type=str,
+    help="Input Video File to the M2UGen model",
+)
+
 args = parser.parse_args()
 
 generated_audio_files = []
@@ -75,20 +91,6 @@ model.to("cuda")
 
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0) == 1 else x)])
-
-
-def postprocess(self, y):
-    if y is None:
-        return []
-    for i, (message, response) in enumerate(y):
-        y[i] = (
-            None if message is None else mdtex2html.convert((message)),
-            None if response is None else mdtex2html.convert(response),
-        )
-    return y
-
-
-gr.Chatbot.postprocess = postprocess
 
 
 def parse_text(text, image_path, video_path, audio_path):
@@ -152,6 +154,7 @@ def save_audio_to_local(audio, sec):
 def parse_reponse(model_outputs, audio_length_in_s):
     response = ''
     text_outputs = []
+    filename = None
     for output_i, p in enumerate(model_outputs):
         if isinstance(p, str):
             response += p
@@ -166,36 +169,13 @@ def parse_reponse(model_outputs, audio_length_in_s):
                     _temp_output += m.replace(''.join([f'[AUD{i}]' for i in range(8)]), '')
                 else:
                     filename = save_audio_to_local(m, audio_length_in_s)
-                    print(filename)
                     _temp_output = f'<Audio>{filename}</Audio> ' + _temp_output
                     response += f'<audio controls playsinline><source src="./file={filename}" type="audio/wav"></audio>'
             text_outputs.append(_temp_output)
         else:
             pass
     response = response[:-len("<br>")].rstrip() if response.endswith("<br>") else response
-    return response, text_outputs
-
-
-def reset_user_input():
-    return gr.update(value='')
-
-
-def reset_dialog():
-    return [], []
-
-
-def reset_state():
-    global generated_audio_files
-    generated_audio_files = []
-    return None, None, None, None, [], [], []
-
-
-def upload_image(conversation, chat_history, image_input):
-    input_image = Image.open(image_input.name).resize(
-        (224, 224)).convert('RGB')
-    input_image.save(image_input.name)  # Overwrite with smaller image.
-    conversation += [(f'<img src="./file={image_input.name}" style="display: inline-block;">', "")]
-    return conversation, chat_history + [input_image, ""]
+    return response, text_outputs, filename
 
 
 def read_video_pyav(container, indices):
@@ -240,13 +220,9 @@ def predict(
         image_path,
         audio_path,
         video_path,
-        chatbot,
         top_p,
         temperature,
-        history,
-        modality_cache,
         audio_length_in_s):
-    global generated_audio_files
     prompts = [llama.format_prompt(prompt_input)]
     prompts = [model.tokenizer(x).input_ids for x in prompts]
     image, audio, video = None, None, None
@@ -263,9 +239,6 @@ def predict(
         indices = sample_frame_indices(clip_len=32, frame_sample_rate=1, seg_len=container.streams.video[0].frames)
         video = read_video_pyav(container=container, indices=indices)
 
-    if len(generated_audio_files) != 0:
-        audio_length_in_s = get_audio_length(generated_audio_files[-1])
-        print(f"Audio Length: {audio_length_in_s}")
     if video_path is not None:
         audio_length_in_s = get_video_length(video_path)
         print(f"Video Length: {audio_length_in_s}")
@@ -274,92 +247,13 @@ def predict(
         generated_audio_files.append(audio_path)
         print(f"Audio Length: {audio_length_in_s}")
 
-    print(image, video, audio)
     response = model.generate(prompts, audio, image, video, 512, temperature, top_p,
                               audio_length_in_s=audio_length_in_s)
-    print(response)
-    response_chat, response_outputs = parse_reponse(response, audio_length_in_s)
-    print('text_outputs: ', response_outputs)
-    user_chat, user_outputs = parse_text(prompt_input, image_path, video_path, audio_path)
-    chatbot.append((user_chat, response_chat))
-    history.append((user_outputs, ''.join(response_outputs).replace('\n###', '')))
-    return chatbot, history, modality_cache, None, None, None,
+    response_chat, response_outputs, filename = parse_reponse(response, audio_length_in_s)
+    print(f"Q. {prompt_input}")
+    print(f"A. {response[0]}")
+    if filename is not None:
+        print(f"Generated Audio: {filename}")
 
 
-with gr.Blocks() as demo:
-    gr.HTML("""
-        <h1 align="center" style=" display: flex; flex-direction: row; justify-content: center; font-size: 25pt; "><img src='./file=bot.png' width="50" height="50" style="margin-right: 10px;">M<sup style="line-height: 200%; font-size: 60%">2</sup>UGen</h1>
-        <h3>This is the demo page of M<sup>2</sup>UGen, a Multimodal LLM capable of Music Understanding and Generation!</h3>
-        <div style="display: flex;"><a href='https://arxiv.org/pdf/2311.11255.pdf'><img src='https://img.shields.io/badge/Paper-PDF-red'></a></div>
-        """)
-
-    with gr.Row():
-        with gr.Column(scale=0.7, min_width=500):
-            with gr.Row():
-                chatbot = gr.Chatbot(label='M2UGen Chatbot', avatar_images=(
-                (os.path.join(os.path.dirname(__file__), 'user.png')),
-                (os.path.join(os.path.dirname(__file__), "bot.png")))).style(height=440)
-
-            with gr.Tab("User Input"):
-                with gr.Row(scale=3):
-                    user_input = gr.Textbox(label="Text", placeholder="Key in something here...", lines=3)
-                with gr.Row(scale=3):
-                    with gr.Column(scale=1):
-                        # image_btn = gr.UploadButton("🖼️ Upload Image", file_types=["image"])
-                        image_path = gr.Image(type="filepath",
-                                              label="Image")  # .style(height=200)  # <PIL.Image.Image image mode=RGB size=512x512 at 0x7F6E06738D90>
-                    with gr.Column(scale=1):
-                        audio_path = gr.Audio(type='filepath')  # .style(height=200)
-                    with gr.Column(scale=1):
-                        video_path = gr.Video()  # .style(height=200) # , value=None, interactive=True
-        with gr.Column(scale=0.3, min_width=300):
-            with gr.Group():
-                with gr.Accordion('Text Advanced Options', open=True):
-                    top_p = gr.Slider(0, 1, value=0.8, step=0.01, label="Top P", interactive=True)
-                    temperature = gr.Slider(0, 1, value=0.6, step=0.01, label="Temperature", interactive=True)
-                with gr.Accordion('Audio Advanced Options', open=False):
-                    audio_length_in_s = gr.Slider(5, 30, value=30, step=1, label="The audio length in seconds",
-                                                  interactive=True)
-            with gr.Tab("Operation"):
-                with gr.Row(scale=1):
-                    submitBtn = gr.Button(value="Submit & Run", variant="primary")
-                with gr.Row(scale=1):
-                    emptyBtn = gr.Button("Clear History")
-
-    history = gr.State([])
-    modality_cache = gr.State([])
-
-    submitBtn.click(
-        predict, [
-            user_input,
-            image_path,
-            audio_path,
-            video_path,
-            chatbot,
-            top_p,
-            temperature,
-            history,
-            modality_cache,
-            audio_length_in_s
-        ], [
-            chatbot,
-            history,
-            modality_cache,
-            image_path,
-            audio_path,
-            video_path
-        ],
-        show_progress=True
-    )
-
-    submitBtn.click(reset_user_input, [], [user_input])
-    emptyBtn.click(reset_state, outputs=[
-        image_path,
-        audio_path,
-        video_path,
-        chatbot,
-        history,
-        modality_cache
-    ], show_progress=True)
-
-demo.queue().launch(share=True, inbrowser=True, server_name='0.0.0.0', server_port=24000)
+predict(args.prompt, args.image_file, args.audio_file, args.video_file, 0.8, 0.6, 30)
