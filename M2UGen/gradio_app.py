@@ -58,7 +58,7 @@ generated_audio_files = []
 llama_type = args.llama_type
 llama_ckpt_dir = os.path.join(args.llama_dir, llama_type)
 llama_tokenzier_path = args.llama_dir
-model = M2UGen(llama_ckpt_dir, llama_tokenzier_path, args, knn=False, stage=3)
+model = M2UGen(llama_ckpt_dir, llama_tokenzier_path, args, knn=False, stage=3, load_llama=False)
 
 print("Loading Model Checkpoint")
 checkpoint = torch.load(args.model, map_location='cpu')

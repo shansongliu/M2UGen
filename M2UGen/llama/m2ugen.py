@@ -28,7 +28,7 @@ class M2UGen(nn.Module):
     """
 
     def __init__(self, llama_ckpt_dir, llama_tokenizer, model_args, knn=False, knn_dir="./ckpts", stage=1,
-                 legacy_bridge=False):
+                 legacy_bridge=False, load_llama=True):
         super().__init__()
 
         self.args = model_args
@@ -145,69 +145,54 @@ class M2UGen(nn.Module):
         self.llama = Transformer(self.model_args)
         torch.set_default_tensor_type(torch.FloatTensor)
 
-        ckpts = sorted(Path(llama_ckpt_dir).glob("*.pth"))
+        if load_llama:
+            print(f"Loading LLaMA Checkpoint...")
+            ckpts = sorted(Path(llama_ckpt_dir).glob("*.pth"))
 
-        """
-        Adapted from https://github.com/cedrickchee/llama/blob/main/chattyllama/combined/inference.py
-        """
-        key_to_dim = {
-            "w1": 0,
-            "w2": -1,
-            "w3": 0,
-            "wo": -1,
-            "wq": 0,
-            "wk": 0,
-            "wv": 0,
-            "output": 0,
-            "tok_embeddings": 2,
-            "ffn_norm": None,
-            "attention_norm": None,
-            "norm": None,
-            "rope": None,
-        }
-        for i, ckpt in enumerate(ckpts):
-            checkpoint = torch.load(ckpt, map_location="cpu")
-            for parameter_name, parameter in self.llama.named_parameters():
-                short_name = parameter_name.split(".")[-2]
-                if "gate" in parameter_name or "lora" in parameter_name or "bias" in parameter_name:
-                    continue
-                if key_to_dim[short_name] is None and i == 0:
-                    parameter.data = checkpoint[parameter_name]
-                elif key_to_dim[short_name] == 0:
-                    size = checkpoint[parameter_name].size(0)
-                    parameter.data[size * i: size * (i + 1), :] = checkpoint[
-                        parameter_name
-                    ]
-                elif key_to_dim[short_name] == -1:
-                    size = checkpoint[parameter_name].size(-1)
-                    parameter.data[:, size * i: size * (i + 1)] = checkpoint[
-                        parameter_name
-                    ]
-                elif key_to_dim[short_name] == 2:
-                    size = checkpoint[parameter_name].size(-1)
-                    parameter.data[:-self.model_args.num_gen_audio_tokens, size * i: size * (i + 1)] = checkpoint[
-                        parameter_name
-                    ]
-                    parameter.data[-self.model_args.num_gen_audio_tokens:, :] = 1
-            del checkpoint
-        '''
-        ckpts_dict = defaultdict(list)
-        for ckpt in ckpts:
-            ckpt = torch.load(ckpt, map_location='cpu')
-            for key, val in ckpt.items():
-                ckpts_dict[key].append(val)
-
-        for key, val in ckpts_dict.items():
-            ckpts_dict[key] = torch.cat(val, dim=-1)
-
-        self.llama.load_state_dict(ckpts_dict, strict=False)
-
-        print(ckpts)
-        for ckpt in ckpts:
-            print(ckpt)
-            ckpt = torch.load(ckpt, map_location='cpu')
-            self.llama.load_state_dict(ckpt, strict=False)
-        '''
+            """
+            Adapted from https://github.com/cedrickchee/llama/blob/main/chattyllama/combined/inference.py
+            """
+            key_to_dim = {
+                "w1": 0,
+                "w2": -1,
+                "w3": 0,
+                "wo": -1,
+                "wq": 0,
+                "wk": 0,
+                "wv": 0,
+                "output": 0,
+                "tok_embeddings": 2,
+                "ffn_norm": None,
+                "attention_norm": None,
+                "norm": None,
+                "rope": None,
+            }
+            for i, ckpt in enumerate(ckpts):
+                checkpoint = torch.load(ckpt, map_location="cpu")
+                for parameter_name, parameter in self.llama.named_parameters():
+                    short_name = parameter_name.split(".")[-2]
+                    if "gate" in parameter_name or "lora" in parameter_name or "bias" in parameter_name:
+                        continue
+                    if key_to_dim[short_name] is None and i == 0:
+                        parameter.data = checkpoint[parameter_name]
+                    elif key_to_dim[short_name] == 0:
+                        size = checkpoint[parameter_name].size(0)
+                        parameter.data[size * i: size * (i + 1), :] = checkpoint[
+                            parameter_name
+                        ]
+                    elif key_to_dim[short_name] == -1:
+                        size = checkpoint[parameter_name].size(-1)
+                        parameter.data[:, size * i: size * (i + 1)] = checkpoint[
+                            parameter_name
+                        ]
+                    elif key_to_dim[short_name] == 2:
+                        size = checkpoint[parameter_name].size(-1)
+                        parameter.data[:-self.model_args.num_gen_audio_tokens, size * i: size * (i + 1)] = checkpoint[
+                            parameter_name
+                        ]
+                        parameter.data[-self.model_args.num_gen_audio_tokens:, :] = 1
+                del checkpoint
+            print(f"LLaMA Checkpoint Loaded")
 
         # 5. projector
         self.output_projector = ProjectionLayer(4096, self.model_args.output_dim_tokens,
