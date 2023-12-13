@@ -45,7 +45,7 @@ def get_args_parser():
                         help='path to ViViT pretrained checkpoint')
     parser.add_argument('--music_decoder', default="musicgen", type=str,
                         help='Decoder to use musicgen/audioldm2')
-    parser.add_argument('--music_decoder_path', default="musicgen", type=str,
+    parser.add_argument('--music_decoder_path', default="facebook/musicgen-medium", type=str,
                         help='Decoder to use musicgen/audioldm2')
     parser.add_argument('--max_words', default=1024, type=int,
                         help='max number of input words')
