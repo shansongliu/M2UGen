@@ -32,7 +32,7 @@ The trained checkpoints for our model is available here:
 - [M<sup>2</sup>UGen with MusicGen](https://huggingface.co/M2UGen/M2UGen-MusicGen)
 - [M<sup>2</sup>UGen with AudioLDM2](https://huggingface.co/M2UGen/M2UGen-AudioLDM2)
 
-The needed pretrained models can be found here:
+The needed pretrained multi-modal encoder and music decoder models can be found here:
 - [MERT](https://huggingface.co/m-a-p/MERT-v1-330M)
 - [ViT](https://huggingface.co/google/vit-base-patch16-224-in21k)
 - [ViViT](https://huggingface.co/google/vivit-b-16x2-kinetics400)
