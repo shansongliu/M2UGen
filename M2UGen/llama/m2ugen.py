@@ -33,8 +33,9 @@ class M2UGen(nn.Module):
 
         self.args = model_args
 
-        # 1. MERT Encoder
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        # 1. MERT Encoder
         # The model files for MERT can be downloaded here in case of network issues:
         # https://huggingface.co/m-a-p/MERT-v1-330M
         # And set the mert_path argument to directory with the model files
@@ -70,6 +71,9 @@ class M2UGen(nn.Module):
         print(f'MERT initialized...')
 
         # 2. ViT Encoder
+        # The model files for ViT can be downloaded here in case of network issues:
+        # https://huggingface.co/google/vit-base-patch16-224-in21k
+        # And set the vit_path argument to directory with the model files
         print(f'Initialize ViT...')
         self.vit_model = ViTModel.from_pretrained(self.args.vit_path)  # .to(self.device)
         self.vit_model.eval()
@@ -94,6 +98,9 @@ class M2UGen(nn.Module):
         print(f'ViT initialized...')
 
         # 3. ViViT Encoder
+        # The model files for ViViT can be downloaded here in case of network issues:
+        # https://huggingface.co/google/vivit-b-16x2-kinetics400
+        # And set the vivit_path argument to directory with the model files
         print(f'Initialize ViViT...')
         self.vivit_model = VivitModel.from_pretrained(self.args.vivit_path)  # .to(self.device)
         self.vivit_model.eval()
@@ -201,13 +208,19 @@ class M2UGen(nn.Module):
 
         # 6. Generator
         if self.args.music_decoder.lower() == "audioldm2":
+            # The model files for AudioLDM2 can be downloaded here in case of network issues:
+            # https://huggingface.co/cvssp/audioldm2-music
+            # And set the music_decoder_path argument to directory with the model files
             print(f'Initialize AudioLDM2...')
-            self.generation_model = AudioLDM2Pipeline.from_pretrained("cvssp/audioldm2-music")
+            self.generation_model = AudioLDM2Pipeline.from_pretrained(self.args.music_decoder_path)
             print(f'AudioLDM2 initialized...')
         else:
+            # The model files for MusicGen can be downloaded here in case of network issues:
+            # https://huggingface.co/facebook/musicgen-medium
+            # And set the music_decoder_path argument to directory with the model files
             print(f'Initialize MusicGen...')
-            self.generation_processor = AutoProcessor.from_pretrained("facebook/musicgen-medium")
-            self.generation_model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-medium")
+            self.generation_processor = AutoProcessor.from_pretrained(self.args.music_decoder_path)
+            self.generation_model = MusicgenForConditionalGeneration.from_pretrained(self.args.music_decoder_path)
             self.generation_model.eval()
             print(f'MusicGen initialized...')
         self.music_decoder = self.args.music_decoder.lower()
