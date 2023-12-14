@@ -1,4 +1,4 @@
 from .llama import ModelArgs, Transformer
 from .tokenizer import Tokenizer
-from .m2ugen import *
+from .llama_adapter import *
 from .utils import format_prompt

@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 
 import util.misc as misc
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
-from llama.mu2gen import M2UGen
+from llama.m2ugen import M2UGen
 
 from data.dataset import FinetuneDataset
 
