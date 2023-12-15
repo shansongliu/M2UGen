@@ -46,7 +46,7 @@ def get_args_parser():
     parser.add_argument('--music_decoder', default="musicgen", type=str,
                         help='Decoder to use musicgen/audioldm2')
     parser.add_argument('--music_decoder_path', default="facebook/musicgen-medium", type=str,
-                        help='Decoder to use musicgen/audioldm2')
+                        help='Path to decoder to use musicgen/audioldm2')
     parser.add_argument('--max_words', default=1024, type=int,
                         help='max number of input words')
 

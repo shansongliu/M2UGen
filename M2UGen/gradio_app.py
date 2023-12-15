@@ -51,6 +51,10 @@ parser.add_argument(
     '--music_decoder', default="musicgen", type=str,
     help='Decoder to use musicgen/audioldm2')
 
+parser.add_argument(
+    '--music_decoder_path', default="facebook/musicgen-medium", type=str,
+    help='Path to decoder to use musicgen/audioldm2')
+
 args = parser.parse_args()
 
 generated_audio_files = []
