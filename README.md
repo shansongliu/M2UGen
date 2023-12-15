@@ -6,10 +6,11 @@
 </p>
 
 [![PWC](https://img.shields.io/badge/%F0%9F%93%8E%20arXiv-Paper-red)](https://arxiv.org/abs/2311.11255)
+[![PWC](https://img.shields.io/badge/%F0%9F%8C%8E%20Website-Official%20Page-blue)]([https://arxiv.org/abs/2311.11255](https://crypto-code.github.io/M2UGen-Demo/))
 
 This is the official repository for *[M<sup>2</sup>UGen: Multi-modal Music Understanding and Generation with the Power of Large Language Models](https://arxiv.org/abs/2308.11276)*.
 
-## Introduction
+## 🚀 Introduction
 
 The M<sup>2</sup>UGen model is a Music Understanding and Generation model that is capable of Music Question Answering and also Music Generation from texts, images, videos and audios, as well as Music Editing. The model utilizes encoders such as MERT for music understanding, ViT for image understanding and ViViT for video understanding and the MusicGen/AudioLDM2 model as the music generation model (music decoder), coupled with adapters and the LLaMA 2 model to make the model possible for multiple abilities. The model architecture is given in [**_m2ugen.py_**](./M2UGen/llama/m2ugen.py). 
 
@@ -19,7 +20,7 @@ The M<sup>2</sup>UGen model is a Music Understanding and Generation model that i
 
 To train our model, we generate datasets using a music captioning and question answering model, i.e. the [MU-LLaMA](https://github.com/crypto-code/MU-LLaMA) model. The dataset generation methods are given in the [Datasets](./Datasets) folder. 
 
-## Model Setup
+## 🤖 Model Setup
 
 We use Python 3.9.17 for this project and the library requirements are given in requirements.txt. Create a conda environment using
 ```
@@ -73,7 +74,7 @@ For model with AudioLDM2
 python gradio_app.py --model ./ckpts/M2UGen-AudioLDM2 --llama_dir ./ckpts/LLaMA-2 --music_decoder audioldm2
 ```
 
-## Dataset Generation
+## 🗄️ Dataset Generation
 
 We use the [MU-LLaMA](https://github.com/crypto-code/MU-LLaMA) and [MPT-7B](https://huggingface.co/mosaicml/mpt-7b-chat) models to generate the MUCaps, MUEdit, MUImge and MUVideo datasets. For each of the datasets, run the scripts in the folder [Datasets](./Datasets) in its numbered order to generate the datasets.
 
@@ -83,13 +84,13 @@ The datasets are also available for download here:
 - [MUImage](https://huggingface.co/datasets/M2UGen/MUImage)
 - [MUVideo](https://huggingface.co/datasets/M2UGen/MUVideo)
 
-## Model Training
+## 🔧 Model Training
 
 To train the M<sup>2</sup>UGen model, run the [**_train_musicgen.sh_**](./M2UGen/train_musicgen.sh) or [**_train_audioldm2.sh_**](./M2UGen/train_audioldm2.sh) script. The scripts are designed to train the model for all three stages with [MusicGen](https://huggingface.co/docs/transformers/model_doc/musicgen) and [AudioLDM2](https://huggingface.co/docs/diffusers/main/en/api/pipelines/audioldm2) music decoders respectively.
 
 The main model architecture is given in [**_m2ugen.py_**](./M2UGen/llama/m2ugen.py) and the modified MusicGen and AudioLDM2 architectures are present within the [**_musicgen_**](./M2UGen/llama/musicgen/) and [**_audioldm2_**](./M2UGen/llama/audioldm2/) folders respectively. The [**_data_**](./M2UGen/data/) folder contains the python files to handle loading the dataset. The [**_dataset.py_**](./M2UGen/data/dataset.py) file will show the use of different datasets based on the training stage. The code for the training epochs are present in [**_engine_train.py_**](./M2UGen/engine_train.py).
 
-## Model Testing
+## 🔨 Model Testing
 
 To test the M<sup>2</sup>UGen model, run [**_gradio_app.py_**](./M2UGen/gradio_app.py).
 
@@ -115,17 +116,17 @@ optional arguments:
                         Decoder to use musicgen/audioldm2
 ```
 
-## GPU requirements
+## 🧰 System Hardware requirements
 
-For training, stage 1 and 2 use a single 32GB V100 GPU while stage 3 uses 2 32GB V100 GPUs. For inference, a single 32GB V100 GPU is used.
+For training, stage 1 and 2 use a single 32GB V100 GPU while stage 3 uses 2 32GB V100 GPUs. For inference, a single 32GB V100 GPU is used. For loading model checkpoint, aproximately 49GB of CPU memory is required.
 
-## Acknowledgements
+## 🫡 Acknowledgements
 
 This code contains elements from the following repo:
 - [crypto-code/MU-LLaMA](https://github.com/crypto-code/MU-LLaMA)
 
 
-## Cite our work
+## ✨ Cite our work
 If you find this repo useful, please consider citing: 
 ```bibtex
 @article{hussain2023m,
