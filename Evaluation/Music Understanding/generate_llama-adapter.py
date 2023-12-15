@@ -1,25 +1,21 @@
 import sys
 
-sys.path.append('./imagebind_LLM')
+sys.path.append('../Models/imagebind_LLM')
 
-import imagebind_LLM.ImageBind.data as data
-import imagebind_LLM.llama as llama
-import pandas as pd
-import librosa
-from tqdm import tqdm
+import Evaluation.Models.imagebind_LLM.ImageBind.data as data
+import Evaluation.Models.imagebind_LLM.llama as llama
 import os
-from pydub import AudioSegment
 import json
 from collections import defaultdict
 import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--model", default="../MU-LLaMA/ckpts/7B.pth", type=str,
+    "--model", default="../Models/MU-LLaMA/ckpts/7B.pth", type=str,
     help="Name of or path to the trained checkpoint",
 )
 parser.add_argument(
-    "--llama_dir", default="../MU-LLaMA/ckpts/LLaMA-2", type=str,
+    "--llama_dir", default="../Models/MU-LLaMA/ckpts/LLaMA-2", type=str,
     help="Path to LLaMA pretrained checkpoint",
 )
 args = parser.parse_args()

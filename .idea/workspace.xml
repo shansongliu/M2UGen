@@ -9,10 +9,50 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/pointbert/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/gradio_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/gradio_app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/inference.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/inference.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/main_train.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/main_train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/generate_llama-adapter.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Music Understanding/generate_llama-adapter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.assets/bird_audio.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.assets/bird_audio.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.assets/bird_image.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.assets/bird_image.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.assets/car_audio.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.assets/car_audio.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.assets/car_image.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.assets/car_image.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.assets/dog_audio.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.assets/dog_audio.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.assets/dog_image.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.assets/dog_image.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.data.py.swp" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.data.py.swp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/CODE_OF_CONDUCT.md" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/CODE_OF_CONDUCT.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/CONTRIBUTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/CONTRIBUTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/LICENSE" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/bpe/bpe_simple_vocab_16e6.txt.gz" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/bpe/bpe_simple_vocab_16e6.txt.gz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/demo.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/demo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/model_card.md" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/model_card.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/imagebind_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/imagebind_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/multimodal_preprocessors.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/multimodal_preprocessors.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/pointbert/PointTransformer_8192point.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/pointbert/PointTransformer_8192point.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/pointbert/checkpoint.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/pointbert/checkpoint.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/pointbert/dvae.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/pointbert/dvae.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/pointbert/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/pointbert/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/pointbert/misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/pointbert/misc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/pointbert/point_encoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/pointbert/point_encoder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/models/transformer.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/models/transformer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/ImageBind/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/ImageBind/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/llama/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/llama/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/llama/llama.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/llama/llama.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/llama/llama_adapter.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/llama/llama_adapter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/llama/misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/llama/misc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/llama/tokenizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/llama/tokenizer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/llama/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/llama/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/util/lr_sched.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/util/lr_sched.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music Understanding/imagebind_LLM/util/misc.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Models/imagebind_LLM/util/misc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,11 +95,11 @@
       <recent name="$PROJECT_DIR$/MUGen" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Evaluation/Models" />
       <recent name="$PROJECT_DIR$/Datasets/common" />
       <recent name="$PROJECT_DIR$/Datasets" />
       <recent name="$PROJECT_DIR$/assets" />
       <recent name="$PROJECT_DIR$/dataset" />
-      <recent name="$PROJECT_DIR$/data/T-X_pair_data/cc3m" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
