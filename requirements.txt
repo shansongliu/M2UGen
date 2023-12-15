@@ -30,3 +30,5 @@ tqdm==4.65.0
 transformers==4.35.2
 sentencepiece==0.1.99
 librosa==0.10.1
+ffprobe==0.5
+ffmpeg==1.4
