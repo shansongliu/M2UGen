@@ -12,6 +12,7 @@ mullama_data = json.load(open("./results/mullama_data.json", "r"))
 ltu_data = json.load(open("./results/ltu_data.json", "r"))
 llama_data = json.load(open("./results/llama-adapter_data.json", "r"))
 salmonn_data = json.load(open("./results/salmonn_data.json", "r"))
+m2ugen_data = json.load(open("./results/m2ugen_data.json", "r"))
 
 mtg_data = json.load(open("../../Datasets/MusicQA/MusicQA/EvalMusicQA.json", "r"))
 
@@ -37,8 +38,8 @@ def evaluate(model_name, candidates, mult_reference):
     print(f"BERT Score: {bert_score}")
 
 
-reference = {"LTU": [], "LLaMA Adapter": [], "MU-LLaMA": [], "SALMONN": []}
-candidates = {"LTU": [], "LLaMA Adapter": [], "MU-LLaMA": [], "SALMONN": []}
+reference = {"LTU": [], "LLaMA Adapter": [], "MU-LLaMA": [], "SALMONN": [], "M2UGen": []}
+candidates = {"LTU": [], "LLaMA Adapter": [], "MU-LLaMA": [], "SALMONN": [], "M2UGen": []}
 
 for row in tqdm(mtg_data):
     audio = row["audio_name"]
@@ -54,6 +55,9 @@ for row in tqdm(mtg_data):
     if audio in salmonn_data and row["conversation"][0]["value"] in salmonn_data[audio]:
         candidates["SALMONN"].append(salmonn_data[audio][row["conversation"][0]["value"]])
         reference["SALMONN"].append(row["conversation"][1]["value"])
+    if audio in m2ugen_data and row["conversation"][0]["value"] in m2ugen_data[audio]:
+        candidates["M2UGen"].append(m2ugen_data[audio][row["conversation"][0]["value"]])
+        reference["M2UGen"].append(row["conversation"][1]["value"])
 
 for model, val in candidates.items():
     evaluate(model, val, reference[model])

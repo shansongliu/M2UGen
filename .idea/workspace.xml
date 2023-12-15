@@ -9,10 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/evaluate.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/generate_mullama.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/generate_salmonn.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/generate_m2ugen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/Music_Understanding/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/evaluate.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
