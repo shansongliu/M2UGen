@@ -9,9 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/generate_m2ugen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Evaluation/Music_Understanding/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/evaluate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/Models/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Evaluation/__init__.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,21 +37,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/atinsaki/Desktop/NUS/Work/M2UGen/Evaluation/Music Understanding&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/Users/atinsaki/Desktop/NUS/Work/M2UGen/Evaluation/Models",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Evaluation/Models" />
+      <recent name="$PROJECT_DIR$/Evaluation" />
       <recent name="$PROJECT_DIR$/Evaluation/Music Understanding" />
       <recent name="$PROJECT_DIR$/M2UGen" />
       <recent name="$PROJECT_DIR$/Datasets/MUVideo" />
-      <recent name="$PROJECT_DIR$/assets" />
-      <recent name="$PROJECT_DIR$/MUGen" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Evaluation/Music_Understanding" />
