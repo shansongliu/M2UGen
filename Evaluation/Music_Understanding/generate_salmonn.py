@@ -7,7 +7,7 @@ from model import SALMONN
 model = SALMONN(
     ckpt="../Models/SALMONN/salmonn_v1.pth",
     whisper_path="../Models/SALMONN/whisper-large-v2",
-    beats_path="../Models/SALMONNBEATs_iter3.pt",
+    beats_path="../Models/SALMONN/BEATs_iter3.pt",
     vicuna_path="../Models/SALMONN/vicuna-13b-v1.1",
     low_resource=True
 )
