@@ -9,9 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/Text2Music/generate_audioldm2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Evaluation/Text2Music/generate_musicgen.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Evaluation/Music_Understanding/generate_salmonn.py" beforeDir="false" afterPath="$PROJECT_DIR$/Evaluation/Music_Understanding/generate_salmonn.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,17 +41,17 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/Users/atinsaki/Desktop/NUS/Work/M2UGen/Evaluation/Models",
+    "last_opened_file_path": "/Users/atinsaki/Desktop/NUS/Work/M2UGen/Evaluation/Text2Music",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Evaluation/Text2Music" />
       <recent name="$PROJECT_DIR$/Evaluation/Models" />
       <recent name="$PROJECT_DIR$/Evaluation" />
       <recent name="$PROJECT_DIR$/Evaluation/Music Understanding" />
       <recent name="$PROJECT_DIR$/M2UGen" />
-      <recent name="$PROJECT_DIR$/Datasets/MUVideo" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Evaluation/Music_Understanding" />
