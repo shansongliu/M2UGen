@@ -6,7 +6,14 @@ To evaluate the M<sup>2</sup>UGen, we first need to download the state-of-the-ar
 
 To download the [SALMONN](https://github.com/bytedance/SALMONN) model run the following:
 ```commandline
-git clone https://github.com/bytedance/SALMONN.git
+bash download_salmonn.sh
 ```
+The script will clone the repo and download the trained checkpoints required. 
 
-Once the repo is downloaded, follow the instructions [here](https://github.com/bytedance/SALMONN?tab=readme-ov-file#-how-to-inference-in-cli) to download the trained checkpoints.
+## MU-LLaMA
+
+To download the MU-LLaMA model run the following:
+```commandline
+bash download_mullama.sh
+```
+The script will clone the repo and download the trained checkpoints required. 
