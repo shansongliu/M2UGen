@@ -81,51 +81,6 @@ transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0) == 1 else x)])
 
 
-def parse_text(text, image_path, video_path, audio_path):
-    """copy from https://github.com/GaiZhenbiao/ChuanhuChatGPT/"""
-    outputs = text
-    lines = text.split("\n")
-    lines = [line for line in lines if line != ""]
-    count = 0
-    for i, line in enumerate(lines):
-        if "```" in line:
-            count += 1
-            items = line.split('`')
-            if count % 2 == 1:
-                lines[i] = f'<pre><code class="language-{items[-1]}">'
-            else:
-                lines[i] = f'<br></code></pre>'
-        else:
-            if i > 0:
-                if count % 2 == 1:
-                    line = line.replace("`", "\`")
-                    line = line.replace("<", "&lt;")
-                    line = line.replace(">", "&gt;")
-                    line = line.replace(" ", "&nbsp;")
-                    line = line.replace("*", "&ast;")
-                    line = line.replace("_", "&lowbar;")
-                    line = line.replace("-", "&#45;")
-                    line = line.replace(".", "&#46;")
-                    line = line.replace("!", "&#33;")
-                    line = line.replace("(", "&#40;")
-                    line = line.replace(")", "&#41;")
-                    line = line.replace("$", "&#36;")
-                lines[i] = "<br>" + line
-    text = "".join(lines) + "<br>"
-    if image_path is not None:
-        text += f'<img src="./file={image_path}" style="display: inline-block;"><br>'
-        outputs = f'<Image>{image_path}</Image> ' + outputs
-    if video_path is not None:
-        text += f' <video controls playsinline height="320" width="240" style="display: inline-block;"  src="./file={video_path}"></video6><br>'
-        outputs = f'<Video>{video_path}</Video> ' + outputs
-    if audio_path is not None:
-        text += f'<audio controls playsinline><source src="./file={audio_path}" type="audio/wav"></audio><br>'
-        outputs = f'<Audio>{audio_path}</Audio> ' + outputs
-    # text = text[::-1].replace(">rb<", "", 1)[::-1]
-    text = text[:-len("<br>")].rstrip() if text.endswith("<br>") else text
-    return text, outputs
-
-
 def save_audio_to_local(audio):
     filename = 'temp.wav'
     if args.music_decoder == "audioldm2":
@@ -133,70 +88,6 @@ def save_audio_to_local(audio):
     else:
         scipy.io.wavfile.write(filename, rate=model.generation_model.config.audio_encoder.sampling_rate, data=audio)
     return filename
-
-
-def parse_reponse(model_outputs):
-    response = ''
-    text_outputs = []
-    filename = None
-    for output_i, p in enumerate(model_outputs):
-        if isinstance(p, str):
-            response += p
-            response += '<br>'
-            text_outputs.append(p)
-        elif 'aud' in p.keys():
-            _temp_output = ''
-            for idx, m in enumerate(p['aud']):
-                if isinstance(m, str):
-                    response += m.replace(''.join([f'[AUD{i}]' for i in range(8)]), '')
-                    response += '<br>'
-                    _temp_output += m.replace(''.join([f'[AUD{i}]' for i in range(8)]), '')
-                else:
-                    filename = save_audio_to_local(m)
-                    _temp_output = f'<Audio>{filename}</Audio> ' + _temp_output
-                    response += f'<audio controls playsinline><source src="./file={filename}" type="audio/wav"></audio>'
-            text_outputs.append(_temp_output)
-        else:
-            pass
-    response = response[:-len("<br>")].rstrip() if response.endswith("<br>") else response
-    return response, text_outputs, filename
-
-
-def read_video_pyav(container, indices):
-    frames = []
-    container.seek(0)
-    start_index = indices[0]
-    end_index = indices[-1]
-    for i, frame in enumerate(container.decode(video=0)):
-        if i > end_index:
-            break
-        if i >= start_index and i in indices:
-            frames.append(frame)
-    return np.stack([x.to_ndarray(format="rgb24") for x in frames])
-
-
-def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
-    converted_len = int(clip_len * frame_sample_rate)
-    if converted_len > seg_len:
-        converted_len = 0
-    end_idx = np.random.randint(converted_len, seg_len)
-    start_idx = end_idx - converted_len
-    indices = np.linspace(start_idx, end_idx, num=clip_len)
-    indices = np.clip(indices, start_idx, end_idx - 1).astype(np.int64)
-    return indices
-
-
-def get_video_length(filename):
-    result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                             "format=duration", "-of",
-                             "default=noprint_wrappers=1:nokey=1", filename],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
-    return int(round(float(result.stdout)))
-
-
-def get_audio_length(filename):
-    return int(round(librosa.get_duration(path=filename)))
 
 
 def predict(
@@ -215,7 +106,7 @@ def predict(
         audio = torch.mean(waveform, 0)
 
     response = model.generate(prompts, audio, image, video, 512, temperature, top_p)
-    return response[0]
+    return response[-1]['aud']
 
 
 mtg = json.load(open("../../Datasets/MusicQA/MusicQA/EvalMusicQA.json"))
