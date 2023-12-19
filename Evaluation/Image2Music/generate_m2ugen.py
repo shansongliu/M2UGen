@@ -4,12 +4,15 @@ sys.path.append('../../M2UGen')
 
 import json
 from tqdm import tqdm
+from llama.m2ugen import M2UGen
+import llama
 import os
 from pydub import AudioSegment
 import scipy
+import torch
+from PIL import Image
+import torchvision.transforms as transforms
 import argparse
-from llama.m2ugen import M2UGen
-import llama
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -68,13 +71,17 @@ assert len(load_result.unexpected_keys) == 0, f"Unexpected keys: {load_result.un
 model.eval()
 model.to("cuda")
 
-data = json.load(open("../../Datasets/MUCaps/MUCapsEvalCaptions.json"))
+data = json.load(open("../../Datasets/MUImage/MUImageEvalInstructions.json"))
+
+transform = transforms.Compose(
+    [transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0) == 1 else x)])
 
 
-def generate(prompt, length_in_sec=10, top_p=0.8, temperature=0.6):
+def generate(prompt, image_file, length_in_sec=10, top_p=0.8, temperature=0.6):
+    image = Image.open(image_file)
     prompts = [llama.format_prompt(prompt)]
     prompts = [model.tokenizer(x).input_ids for x in prompts]
-    image, audio, video = None, None, None
+    audio, video = None, None
     response = model.generate(prompts, audio, image, video, 512,
                               temperature=temperature, top_p=top_p, audio_length_in_s=length_in_sec)
     return response[-1]['aud']
@@ -83,7 +90,10 @@ def generate(prompt, length_in_sec=10, top_p=0.8, temperature=0.6):
 if not os.path.exists("./results/m2ugen"):
     os.makedirs("./results/m2ugen")
 
-for music, caption in tqdm(data):
-    audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUCaps/audios_eval", music))
-    audio = generate(caption, length_in_sec=audioSegment.duration_seconds)
-    scipy.io.wavfile.write(f"./results/m2ugen/{music}", rate=model.config.audio_encoder.sampling_rate, data=audio)
+for row in tqdm(data):
+    image = f"../../Datasets/MUImage/audioset_images/{row['input_file']}"
+    music = row['output_file']
+    prompt = row['conversation'][0]['value']
+    audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUImage/audioset", music))
+    audio = generate(prompt, image, length_in_sec=audioSegment.duration_seconds)
+    scipy.io.wavfile.write(f"./results/m2ugen/{music}", rate=16000, data=audio)

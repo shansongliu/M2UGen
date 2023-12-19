@@ -5,12 +5,13 @@ sys.path.append('../Models/CoDi')
 import json
 from tqdm import tqdm
 from core.models.model_module_infer import model_module
+from PIL import Image
 import os
 from pydub import AudioSegment
 import scipy
 import torch
 
-data = json.load(open("../../Datasets/MUCaps/MUCapsEvalCaptions.json"))
+data = json.load(open("../../Datasets/MUImage/MUImageEvalInstructions.json"))
 
 model_load_paths = ['../Models/CoDi/checkpoints/CoDi_encoders.pth',
                     '../Models/CoDi/checkpoints/CoDi_text_diffuser.pth',
@@ -22,11 +23,12 @@ model.eval()
 model = model.to("cuda")
 
 
-def generate(prompt, length_in_sec=10):
+def generate(prompt, image_file):
+    image = Image.open(image_file)
     audio_wave = model.inference(
         xtype=['audio'],
-        condition=[prompt],
-        condition_types=['text'],
+        condition=[prompt, image],
+        condition_types=['text', 'image'],
         scale=7.5,
         n_samples=1,
         ddim_steps=50)[0]
@@ -36,7 +38,10 @@ def generate(prompt, length_in_sec=10):
 if not os.path.exists("./results/codi"):
     os.makedirs("./results/codi")
 
-for music, caption in tqdm(data):
-    audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUCaps/audios_eval", music))
-    audio = generate(caption, length_in_sec=audioSegment.duration_seconds)
+for row in tqdm(data):
+    image = f"../../Datasets/MUImage/audioset_images/{row['input_file']}"
+    music = row['output_file']
+    prompt = row['conversation'][0]['value']
+    audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUImage/audioset", music))
+    audio = generate(prompt, image)
     scipy.io.wavfile.write(f"./results/codi/{music}", rate=16000, data=audio)
