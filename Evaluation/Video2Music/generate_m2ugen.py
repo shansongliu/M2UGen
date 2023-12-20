@@ -10,7 +10,6 @@ import os
 from pydub import AudioSegment
 import scipy
 import torch
-from PIL import Image
 import torchvision.transforms as transforms
 import argparse
 import av
@@ -72,7 +71,7 @@ assert len(load_result.unexpected_keys) == 0, f"Unexpected keys: {load_result.un
 model.eval()
 model.to("cuda")
 
-data = json.load(open("../../Datasets/MUImage/MUImageEvalInstructions.json"))
+data = json.load(open("../../Datasets/MUVideo/MUVideoEvalInstructions.json"))
 
 transform = transforms.Compose(
     [transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1) if x.size(0) == 1 else x)])
@@ -118,9 +117,9 @@ if not os.path.exists("./results/m2ugen"):
     os.makedirs("./results/m2ugen")
 
 for row in tqdm(data):
-    image = f"../../Datasets/MUImage/audioset_images/{row['input_file']}"
+    video = f"../../Datasets/MUVideo/audioset_videos/{row['input_file']}"
     music = row['output_file']
     prompt = row['conversation'][0]['value']
-    audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUImage/audioset", music))
-    audio = generate(prompt, image, length_in_sec=audioSegment.duration_seconds)
+    audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUVideo/audioset", music))
+    audio = generate(prompt, video, length_in_sec=audioSegment.duration_seconds)
     scipy.io.wavfile.write(f"./results/m2ugen/{music}", rate=16000, data=audio)
