@@ -7,9 +7,9 @@ import laion_clap
 from pathlib import Path
 import json
 
-scores = {model: {"FAD": 0, "CLAP": 0, "KL": 0} for model in ['MusicGen', 'AudioLDM2', 'CoDi', 'M2UGen']}
+scores = {model: {"FAD": 0, "CLAP": 0, "KL": 0} for model in ['MusicGen', 'AudioLDM2', 'CoDi', 'M2UGen_v1', 'M2UGen_v2']}
 model_files = {"MusicGen": "./results/musicgen", "AudioLDM2": "./results/audioldm2", "CoDi": "./results/codi",
-               "M2UGen": "./results/m2ugen"}
+               "M2UGen_v1": "./results/m2ugen_v1", "M2UGen_v2": "./results/m2ugen_v2"}
 
 frechet = FrechetAudioDistance(model_name="vggish",
                                use_pca=False,
@@ -50,7 +50,7 @@ def clap_compare(filename, caption):
     a = load_clap_audio(filename)
     ae = clap.get_audio_embedding_from_data(x=a)
     te = clap.get_text_embedding([caption])
-    return torch.nn.functional.cosine_similarity(ae, te, dim=1, eps=1e-8)
+    return torch.nn.functional.cosine_similarity(ae, te, dim=0, eps=1e-8)
 
 
 data = json.load(open("../../Datasets/MUCaps/MUCapsEvalCaptions.json"))
