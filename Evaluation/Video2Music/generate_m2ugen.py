@@ -13,6 +13,7 @@ import torch
 import torchvision.transforms as transforms
 import argparse
 import av
+import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
