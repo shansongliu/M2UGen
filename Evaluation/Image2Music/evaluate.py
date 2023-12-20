@@ -3,7 +3,6 @@ from hear21passt.base import get_basic_model, get_model_passt
 import librosa
 from sklearn.metrics import mutual_info_score
 import torch
-import laion_clap
 from pathlib import Path
 import json
 import sys
