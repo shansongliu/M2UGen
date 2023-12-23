@@ -77,7 +77,7 @@ class M2UGen(nn.Module):
         print(f'Initialize ViT...')
         self.vit_model = ViTModel.from_pretrained(self.args.vit_path)  # .to(self.device)
         self.vit_model.eval()
-        self.vit_processor = ViTImageProcessor.from_pretrained(self.args.vit_path)
+        self.vit_processor = ViTImageProcessor.from_pretrained(self.args.vit_path, do_rescale=False)
         self.iu_vit_agg = nn.Conv1d(in_channels=197, out_channels=1, kernel_size=1)
         self.iu_vit_proj = nn.Linear(768, 4096)
 
@@ -132,7 +132,7 @@ class M2UGen(nn.Module):
         if self.args.music_decoder.lower() == "audioldm2":
             self.model_args: ModelArgs = ModelArgs(
                 max_seq_len=1024, max_batch_size=1, w_bias=bias_lora, w_lora=bias_lora,
-                num_output_tokens=1, output_dim_tokens=512,
+                num_output_tokens=1, output_dim_tokens=137216,
                 **params)  # max_batch_size only affects inference
         else:
             self.model_args: ModelArgs = ModelArgs(
@@ -257,8 +257,6 @@ class M2UGen(nn.Module):
                     trainable[name] = para
                 elif "prefix_query" in name:
                     trainable[name] = para
-                elif "tok_embeddings" in name:
-                    trainable[name] = para
         elif stage == 2:
             for name, para in self.named_parameters():
                 if "llama." in name:
@@ -275,14 +273,6 @@ class M2UGen(nn.Module):
                 if "llama." in name:
                     if 'norm' in name or 'bias' in name or 'lora' in name:
                         trainable[name] = para
-                elif "mu_mert_" in name:
-                    trainable[name] = para
-                elif "iu_vivit_" in name:
-                    trainable[name] = para
-                elif "iu_vit_" in name:
-                    trainable[name] = para
-                elif "output_projector" in name:
-                    trainable[name] = para
                 elif "prefix_query" in name:
                     trainable[name] = para
                 elif "tok_embeddings" in name:
@@ -635,7 +625,7 @@ class M2UGen(nn.Module):
             hidden_states.append(self.output_projector(hidden_embedding, input_embedding))
             embeddings = torch.stack(hidden_states, dim=-1).sum(dim=-1)
             mse_loss = self.l2_loss(embeddings, out_embed)
-            del hidden_states, input_embedding, hidden_embedding, out_embed, gen_inputs, embeddings
+            del hidden_states, input_embedding, hidden_embedding, out_embed, embeddings
             # c_loss += mse_loss
         else:
             mse_loss = torch.tensor(0.0)
@@ -728,7 +718,7 @@ class M2UGen(nn.Module):
                 input_text_mask[:, cur_pos], tokens[:, cur_pos], next_token
             )
             tokens[:, cur_pos] = next_token
-            if next_token[0] == self.audio_tokens[start_gather] or start_gather > 0:
+            if next_token[0] == self.audio_tokens[start_gather]:
                 if start_gather == 0:
                     music_output_embeddings = []
                 music_output_embeddings.append(music_output_embedding[:, -1:, :])
@@ -736,9 +726,9 @@ class M2UGen(nn.Module):
                 if start_gather >= len(self.audio_tokens):
                     start_gather = 0
             # trick: early stop if bsz==1
-            if bsz == 1 and next_token[0] == self.tokenizer.eos_token_id:
+            if bsz == 1 and self.tokenizer.decode(tokens[0, cur_pos-2:cur_pos+1]) == "\n###":
                 break
-            prev_pos = cur_pos
+            # prev_pos = cur_pos
 
         decoded = []
         for i, t in enumerate(tokens.tolist()):
