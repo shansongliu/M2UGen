@@ -257,8 +257,6 @@ class M2UGen(nn.Module):
                     trainable[name] = para
                 if "prefix_query" in name:
                     trainable[name] = para
-                if "output_projector" in name:
-                    trainable[name] = para
                 if "tok_embeddings" in name:
                     trainable[name] = para
         elif stage == 2:
