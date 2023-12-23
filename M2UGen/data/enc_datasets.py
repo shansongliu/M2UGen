@@ -74,9 +74,7 @@ class MUCapsDataset(Dataset):
         input1 = torch.tensor(self.tokenizer(input1).input_ids, dtype=torch.int64)
         input2 = torch.tensor(self.tokenizer(input2).input_ids, dtype=torch.int64)
         padding = self.max_words - input2.shape[0]
-        if padding > 0:
-            input2 = torch.cat((input2, torch.zeros(1, dtype=torch.int64) - 1))
-        elif padding < 0:
+        if padding < 0:
             input2 = input2[:self.max_words]
         labels = copy.deepcopy(input2)
         labels[:len(input1)] = -1
@@ -125,9 +123,7 @@ class COCODataset(Dataset):
         input1 = torch.tensor(self.tokenizer(input1).input_ids, dtype=torch.int64)
         input2 = torch.tensor(self.tokenizer(input2).input_ids, dtype=torch.int64)
         padding = self.max_words - input2.shape[0]
-        if padding > 0:
-            input2 = torch.cat((input2, torch.zeros(1, dtype=torch.int64) - 1))
-        elif padding < 0:
+        if padding < 0:
             input2 = input2[:self.max_words]
         labels = copy.deepcopy(input2)
         labels[:len(input1)] = -1
@@ -177,8 +173,6 @@ class VideoCapsDataset(Dataset):
         input1 = torch.tensor(self.tokenizer(input1).input_ids, dtype=torch.int64)
         input2 = torch.tensor(self.tokenizer(input2).input_ids, dtype=torch.int64)
         padding = self.max_words - input2.shape[0]
-        if padding > 0:
-            input2 = torch.cat((input2, torch.zeros(1, dtype=torch.int64) - 1))
         if padding < 0:
             input2 = input2[:self.max_words]
         labels = copy.deepcopy(input2)

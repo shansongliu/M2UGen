@@ -32,7 +32,7 @@ class MUCapsDecoderDataset(Dataset):
     def __getitem__(self, index):
         filename = self.mm_path_list[index]
         question = self.caption_list[index]
-        answer = "".join([f"[AUD{i}]" for i in range(8)])
+        answer = self.caption_list[index] + "".join([f"[AUD{i}]" for i in range(8)])
         sample_rate = 24000
         waveform, sr = torchaudio.load(filename)
         if sample_rate != sr:
@@ -45,8 +45,6 @@ class MUCapsDecoderDataset(Dataset):
         input1 = torch.tensor(self.tokenizer(input1).input_ids, dtype=torch.int64)
         input2 = torch.tensor(self.tokenizer(input2).input_ids, dtype=torch.int64)
         padding = self.max_words - input2.shape[0]
-        if padding > 0:
-            input2 = torch.cat((input2, torch.zeros(1, dtype=torch.int64) - 1))
         if padding < 0:
             input2 = input2[:self.max_words]
         labels = copy.deepcopy(input2)

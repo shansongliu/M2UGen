@@ -17,3 +17,11 @@ To download the MU-LLaMA model run the following:
 bash download_mullama.sh
 ```
 The script will clone the repo and download the trained checkpoints required. 
+
+## CoDi
+
+To download the CoDi model checkpoints run the following:
+```commandline
+bash download_codi.sh
+```
+The script will download the trained checkpoints required. 

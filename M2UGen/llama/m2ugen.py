@@ -226,9 +226,9 @@ class M2UGen(nn.Module):
         self.music_decoder = self.args.music_decoder.lower()
 
         # 4. prefix
-        self.query_layer = 6
+        self.query_layer = 20
         self.query_len = 1
-        self.prefix_query = nn.Embedding(self.query_layer * 3 * self.query_len, self.model_args.dim)
+        self.prefix_query = nn.Embedding(self.query_layer * self.query_len, self.model_args.dim)
 
         # 5. knn
         self.knn = knn
@@ -249,24 +249,28 @@ class M2UGen(nn.Module):
                 if "llama." in name:
                     if 'norm' in name or 'bias' in name or 'lora' in name:
                         trainable[name] = para
-                elif "mu_mert_" in name:
+                if "mu_mert_" in name:
                     trainable[name] = para
-                elif "iu_vivit_" in name:
+                if "iu_vivit_" in name:
                     trainable[name] = para
-                elif "iu_vit_" in name:
+                if "iu_vit_" in name:
                     trainable[name] = para
-                elif "prefix_query" in name:
+                if "prefix_query" in name:
+                    trainable[name] = para
+                if "output_projector" in name:
+                    trainable[name] = para
+                if "tok_embeddings" in name:
                     trainable[name] = para
         elif stage == 2:
             for name, para in self.named_parameters():
                 if "llama." in name:
                     if 'norm' in name or 'bias' in name or 'lora' in name:
                         trainable[name] = para
-                elif "output_projector" in name:
+                if "output_projector" in name:
                     trainable[name] = para
-                elif "prefix_query" in name:
+                if "prefix_query" in name:
                     trainable[name] = para
-                elif "tok_embeddings" in name:
+                if "tok_embeddings" in name:
                     trainable[name] = para
         elif stage == 3:
             for name, para in self.named_parameters():
@@ -483,51 +487,30 @@ class M2UGen(nn.Module):
         h = self.llama.tok_embeddings(tokens)
         freqs_cis = self.llama.freqs_cis.to(h.device)
         freqs_cis = freqs_cis[start_pos:start_pos + seqlen]
+
+        feats = torch.zeros((1, 1, 4096)).to(self.device)
+        if audio_feats is not None:
+            feats += audio_feats
+        if video_feats is not None:
+            feats += video_feats
+        if image_feats is not None:
+            feats += image_feats
+
         mask = None
         mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device)
         mask = torch.triu(mask, diagonal=start_pos + 1).type_as(h)
 
         music_output_embedding = []
-        for layer in self.llama.layers[:-3 * self.query_layer]:
+        for layer in self.llama.layers[:-1 * self.query_layer]:
             h = layer(h, 0, freqs_cis, mask)
             music_output_embedding.append(h)
 
-        prefix_query = self.prefix_query.weight.reshape(
-            self.query_layer * 3, 1, 4096).unsqueeze(1)
+        prefix_query = self.prefix_query.weight.reshape(self.query_layer, 1, 4096).unsqueeze(1)
 
         prefix_index = 0
-        if audio_feats is not None:
-            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, audio_feats + prefix_query[prefix_index])
-                music_output_embedding.append(h)
-                prefix_index = prefix_index + 1
-        else:
-            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
-                music_output_embedding.append(h)
-                prefix_index = prefix_index + 1
-
-        if image_feats is not None:
-            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, image_feats + prefix_query[prefix_index])
-                music_output_embedding.append(h)
-                prefix_index = prefix_index + 1
-        else:
-            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
-                music_output_embedding.append(h)
-                prefix_index = prefix_index + 1
-
-        if video_feats is not None:
-            for layer in self.llama.layers[-1 * self.query_layer:]:
-                h = layer(h, 0, freqs_cis, mask, video_feats + prefix_query[prefix_index])
-                music_output_embedding.append(h)
-                prefix_index = prefix_index + 1
-        else:
-            for layer in self.llama.layers[-1 * self.query_layer:]:
-                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
-                music_output_embedding.append(h)
-                prefix_index = prefix_index + 1
+        for layer in self.llama.layers[-1 * self.query_layer:]:
+            h = layer(h, 0, freqs_cis, mask, feats + prefix_query[prefix_index])
+            prefix_index = prefix_index + 1
 
         h = self.llama.norm(h)
         output = self.llama.output(h[:, -1, :])
@@ -535,13 +518,13 @@ class M2UGen(nn.Module):
         return output.float(), torch.cat(music_output_embedding[-1:], dim=1)
 
     def forward(self, tokens, labels, audios=None, imgs=None, videos=None, music_caption=None):
+        feats = torch.zeros((1, 1, 4096)).to(self.device)
         if audios is not None:
-            audio_feats = self.forward_audio({'Audio': [audios, 1]})
+            feats += self.forward_audio({'Audio': [audios, 1]})
         if videos is not None:
-            video_feats = self.forward_video({'Video': [videos, 1]})
+            feats += self.forward_video({'Video': [videos, 1]})
         if imgs is not None:
-            image_feats = self.forward_image({'Image': [imgs, 1]})
-
+            feats += self.forward_image({'Image': [imgs, 1]})
         _bsz, seqlen = tokens.shape
 
         h = self.llama.tok_embeddings(tokens.to(self.device))
@@ -551,38 +534,14 @@ class M2UGen(nn.Module):
         mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device)
         mask = torch.triu(mask, diagonal=0 + 1).type_as(h)
 
-        for layer in self.llama.layers[:-3 * self.query_layer]:
+        for layer in self.llama.layers[:-1 * self.query_layer]:
             h = layer(h, 0, freqs_cis, mask)
-        prefix_query = self.prefix_query.weight.reshape(
-            self.query_layer * 3, 1, 4096).unsqueeze(1)
-
+        prefix_query = self.prefix_query.weight.reshape(self.query_layer, 1, 4096).unsqueeze(1)
         prefix_index = 0
-        if audios is not None:
-            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, audio_feats + prefix_query[prefix_index])
-                prefix_index = prefix_index + 1
-        else:
-            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
-                prefix_index = prefix_index + 1
 
-        if imgs is not None:
-            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, image_feats + prefix_query[prefix_index])
-                prefix_index = prefix_index + 1
-        else:
-            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
-                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
-                prefix_index = prefix_index + 1
-
-        if videos is not None:
-            for layer in self.llama.layers[-1 * self.query_layer:]:
-                h = layer(h, 0, freqs_cis, mask, video_feats + prefix_query[prefix_index])
-                prefix_index = prefix_index + 1
-        else:
-            for layer in self.llama.layers[-1 * self.query_layer:]:
-                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
-                prefix_index = prefix_index + 1
+        for layer in self.llama.layers[-1 * self.query_layer:]:
+            h = layer(h, 0, freqs_cis, mask, feats + prefix_query[prefix_index])
+            prefix_index = prefix_index + 1
 
         final_hidden = h
         h = self.llama.norm(h)
@@ -597,6 +556,8 @@ class M2UGen(nn.Module):
             c_loss = self.criterion(output.reshape(-1, self.llama.vocab_size), labels.flatten().to(self.device))
 
         if music_caption is not None and any([mc != '' for mc in music_caption]):
+            if not all([i in output for i in range(32000, 32008)]):
+                c_loss += 100
             if self.music_decoder == "audioldm2":
                 prompt_embeds, generated_prompt_embeds = self.generation_model(prompt=list(music_caption),
                                                                                guidance_scale=1,
@@ -628,7 +589,10 @@ class M2UGen(nn.Module):
             del hidden_states, input_embedding, hidden_embedding, out_embed, embeddings
             # c_loss += mse_loss
         else:
+            if any([i in output for i in range(32000, 32008)]):
+                c_loss += 100
             mse_loss = torch.tensor(0.0)
+        del feats
         return c_loss, mse_loss
 
     @torch.inference_mode()
