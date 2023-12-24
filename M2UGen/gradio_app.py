@@ -158,16 +158,16 @@ def parse_reponse(model_outputs, audio_length_in_s):
     text_outputs = []
     for output_i, p in enumerate(model_outputs):
         if isinstance(p, str):
-            response += p
+            response += p.replace(' '.join([f'[AUD{i}]' for i in range(8)]), '')
             response += '<br>'
-            text_outputs.append(p)
+            text_outputs.append(p.replace(' '.join([f'[AUD{i}]' for i in range(8)]), ''))
         elif 'aud' in p.keys():
             _temp_output = ''
             for idx, m in enumerate(p['aud']):
                 if isinstance(m, str):
-                    response += m.replace(''.join([f'[AUD{i}]' for i in range(8)]), '')
+                    response += m.replace(' '.join([f'[AUD{i}]' for i in range(8)]), '')
                     response += '<br>'
-                    _temp_output += m.replace(''.join([f'[AUD{i}]' for i in range(8)]), '')
+                    _temp_output += m.replace(' '.join([f'[AUD{i}]' for i in range(8)]), '')
                 else:
                     filename = save_audio_to_local(m, audio_length_in_s)
                     print(filename)
@@ -270,6 +270,11 @@ def predict(
     if len(generated_audio_files) != 0:
         audio_length_in_s = get_audio_length(generated_audio_files[-1])
         print(f"Audio Length: {audio_length_in_s}")
+        sample_rate = 24000
+        waveform, sr = torchaudio.load(generated_audio_files[-1])
+        if sample_rate != sr:
+            waveform = torchaudio.functional.resample(waveform, orig_freq=sr, new_freq=sample_rate)
+        audio = torch.mean(waveform, 0)
     if video_path is not None:
         audio_length_in_s = get_video_length(video_path)
         print(f"Video Length: {audio_length_in_s}")

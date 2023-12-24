@@ -10,7 +10,8 @@
   <component name="ChangeListManager">
     <list default="true" id="e56446ac-d4fb-459a-9228-37bfb53911f4" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2UGen/data/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/data/dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/M2UGen/gradio_app.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/gradio_app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/M2UGen/llama/m2ugen.py" beforeDir="false" afterPath="$PROJECT_DIR$/M2UGen/llama/m2ugen.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

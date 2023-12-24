@@ -257,6 +257,8 @@ class M2UGen(nn.Module):
                     trainable[name] = para
                 if "prefix_query" in name:
                     trainable[name] = para
+                if "output_projector" in name:
+                    trainable[name] = para
                 if "tok_embeddings" in name:
                     trainable[name] = para
         elif stage == 2:
@@ -594,7 +596,7 @@ class M2UGen(nn.Module):
         return c_loss, mse_loss
 
     @torch.inference_mode()
-    def generate_music(self, embeddings, audio_length_in_s):
+    def generate_music(self, embeddings, audio_length_in_s, music_caption):
         gen_prefix = ''.join([f'[AUD{i}]' for i in range(len(self.audio_tokens))])
         gen_prefx_ids = self.tokenizer(gen_prefix, add_special_tokens=False, return_tensors="pt").input_ids.to(
             self.device)
@@ -609,7 +611,11 @@ class M2UGen(nn.Module):
                                                   audio_length_in_s=audio_length_in_s).audios
             return audio_outputs
         else:
-            gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs) / 10
+            gen_emb = 0.1 * self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs) / 10
+            gen_inputs = self.generation_processor(text=music_caption, padding='max_length',
+                                                   max_length=128, truncation=True, return_tensors="pt").to(
+                self.device)
+            gen_emb = self.generation_model.generate(**gen_inputs, guidance_scale=1, encoder_only=True)
             audio_outputs = self.generation_model.generate(guidance_scale=1,
                                                            max_new_tokens=int(256 / 5 * audio_length_in_s),
                                                            encoder_outputs=(gen_emb,))
@@ -688,7 +694,7 @@ class M2UGen(nn.Module):
                 if start_gather >= len(self.audio_tokens):
                     start_gather = 0
             # trick: early stop if bsz==1
-            if bsz == 1 and self.tokenizer.decode(tokens[0, cur_pos-2:cur_pos+1]) == "\n###":
+            if bsz == 1 and self.tokenizer.decode(tokens[0, cur_pos - 2:cur_pos + 1]) == "\n###":
                 break
             # prev_pos = cur_pos
 
@@ -699,14 +705,14 @@ class M2UGen(nn.Module):
             t = t[len(prompts[i]): len(prompts[i]) + max_gen_len]
             # cut to eos tok if any
             try:
-                t = t[: t.index(self.tokenizer.eos_token_id)]
+                t = t[: t.index(13)]
             except ValueError:
                 pass
             decoded.append(self.tokenizer.decode(t))
 
         if len(music_output_embeddings) == len(self.audio_tokens):
             music_output_embeddings = torch.cat(music_output_embeddings, dim=1)
-            return [decoded[0], {'aud': [self.generate_music(music_output_embeddings, audio_length_in_s)]}]
+            return [decoded[0], {'aud': [self.generate_music(music_output_embeddings, audio_length_in_s, decoded[0])]}]
 
         return [decoded[0]]
 
