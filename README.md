@@ -26,6 +26,7 @@ We use Python 3.9.17 for this project and the library requirements are given in 
 ```
 conda create --name <env> --file requirements.txt
 ```
+Ensure that the NVIDIA Driver is version 12 or above to be compatible with PyTorch 2.1.0.
 
 For the working of our model, Facebook's LLaMA-2 model weights are required, details on obtaining these weights are given on [HuggingFace](https://huggingface.co/docs/transformers/main/model_doc/llama). 
 
