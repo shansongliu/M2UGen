@@ -602,21 +602,28 @@ class M2UGen(nn.Module):
             self.device)
         gen_prefix_embs = self.llama.tok_embeddings(gen_prefx_ids)
         if self.music_decoder == "audioldm2":
-            gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs).squeeze(dim=0) / 10
-            prompt_embeds, generated_prompt_embeds = gen_emb[:, :128 * 1024], gen_emb[:, 128 * 1024:]
-            prompt_embeds = prompt_embeds.reshape(prompt_embeds.shape[0], 128, 1024)
-            generated_prompt_embeds = generated_prompt_embeds.reshape(generated_prompt_embeds.shape[0], 8, 768)
+            # gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs).squeeze(dim=0) / 10
+            # prompt_embeds, generated_prompt_embeds = gen_emb[:, :128 * 1024], gen_emb[:, 128 * 1024:]
+            # prompt_embeds = prompt_embeds.reshape(prompt_embeds.shape[0], 128, 1024)
+            # generated_prompt_embeds = generated_prompt_embeds.reshape(generated_prompt_embeds.shape[0], 8, 768)
+            print("Generating Music...")
+            prompt_embeds, generated_prompt_embeds = self.generation_model(prompt=list(music_caption),
+                                                                           guidance_scale=3.5,
+                                                                           return_prompts_only=True)
             audio_outputs = self.generation_model(prompt_embeds=prompt_embeds,
+                                                  num_inference_steps=100,
+                                                  guidance_scale=3.5,
                                                   generated_prompt_embeds=generated_prompt_embeds,
                                                   audio_length_in_s=audio_length_in_s).audios
             return audio_outputs
         else:
+            print("Generating Music...")
             gen_emb = 0.1 * self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs) / 10
             gen_inputs = self.generation_processor(text=music_caption, padding='max_length',
                                                    max_length=128, truncation=True, return_tensors="pt").to(
                 self.device)
-            gen_emb = self.generation_model.generate(**gen_inputs, guidance_scale=1, encoder_only=True)
-            audio_outputs = self.generation_model.generate(guidance_scale=1,
+            gen_emb = self.generation_model.generate(**gen_inputs, guidance_scale=3.5, encoder_only=True)
+            audio_outputs = self.generation_model.generate(guidance_scale=3.5,
                                                            max_new_tokens=int(256 / 5 * audio_length_in_s),
                                                            encoder_outputs=(gen_emb,))
             return audio_outputs[0][0].cpu().detach().numpy()
