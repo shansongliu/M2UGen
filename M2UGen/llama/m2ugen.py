@@ -602,14 +602,11 @@ class M2UGen(nn.Module):
             self.device)
         gen_prefix_embs = self.llama.tok_embeddings(gen_prefx_ids)
         if self.music_decoder == "audioldm2":
-            # gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs).squeeze(dim=0) / 10
-            # prompt_embeds, generated_prompt_embeds = gen_emb[:, :128 * 1024], gen_emb[:, 128 * 1024:]
-            # prompt_embeds = prompt_embeds.reshape(prompt_embeds.shape[0], 128, 1024)
-            # generated_prompt_embeds = generated_prompt_embeds.reshape(generated_prompt_embeds.shape[0], 8, 768)
+            gen_emb = self.output_projector(embeddings.float().to("cuda"), gen_prefix_embs).squeeze(dim=0) / 10
+            prompt_embeds, generated_prompt_embeds = gen_emb[:, :128 * 1024], gen_emb[:, 128 * 1024:]
+            prompt_embeds = prompt_embeds.reshape(prompt_embeds.shape[0], 128, 1024)
+            generated_prompt_embeds = generated_prompt_embeds.reshape(generated_prompt_embeds.shape[0], 8, 768)
             print("Generating Music...")
-            # prompt_embeds, generated_prompt_embeds = self.generation_model(prompt=music_caption[0],
-            #                                                                guidance_scale=3.5,
-            #                                                                return_prompts_only=True)
             audio_outputs = self.generation_model(music_caption[0],
                                                   num_inference_steps=200,
                                                   guidance_scale=3.5,
