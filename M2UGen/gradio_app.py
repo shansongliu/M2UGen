@@ -205,14 +205,12 @@ def upload_image(conversation, chat_history, image_input):
 def read_video_pyav(container, indices):
     frames = []
     container.seek(0)
-    start_index = indices[0]
-    end_index = indices[-1]
     for i, frame in enumerate(container.decode(video=0)):
-        if i > end_index:
-            break
-        if i >= start_index and i in indices:
-            frames.append(frame)
-    return np.stack([x.to_ndarray(format="rgb24") for x in frames])
+        frames.append(frame)
+    chosen_frames = []
+    for i in indices:
+        chosen_frames.append(frames[i])
+    return np.stack([x.to_ndarray(format="rgb24") for x in chosen_frames])
 
 
 def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
@@ -227,6 +225,7 @@ def sample_frame_indices(clip_len, frame_sample_rate, seg_len):
 
 
 def get_video_length(filename):
+    print("Getting Video Length")
     result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                              "format=duration", "-of",
                              "default=noprint_wrappers=1:nokey=1", filename],
@@ -263,6 +262,7 @@ def predict(
             waveform = torchaudio.functional.resample(waveform, orig_freq=sr, new_freq=sample_rate)
         audio = torch.mean(waveform, 0)
     if video_path is not None:
+        print("Opening Video")
         container = av.open(video_path)
         indices = sample_frame_indices(clip_len=32, frame_sample_rate=1, seg_len=container.streams.video[0].frames)
         video = read_video_pyav(container=container, indices=indices)
