@@ -28,12 +28,15 @@ class M2UGen(nn.Module):
     """
 
     def __init__(self, llama_ckpt_dir, llama_tokenizer, model_args, knn=False, knn_dir="./ckpts", stage=1,
-                 legacy_bridge=False, load_llama=True):
+                 legacy_bridge=False, load_llama=True, device=None):
         super().__init__()
 
         self.args = model_args
 
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        if device is None:
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        else:
+            self.device = device
 
         # 1. MERT Encoder
         # The model files for MERT can be downloaded here in case of network issues:
@@ -212,7 +215,9 @@ class M2UGen(nn.Module):
             # https://huggingface.co/cvssp/audioldm2-music
             # And set the music_decoder_path argument to directory with the model files
             print(f'Initialize AudioLDM2...')
-            self.generation_model = AudioLDM2Pipeline.from_pretrained(self.args.music_decoder_path)
+            dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+            self.generation_model = AudioLDM2Pipeline.from_pretrained(self.args.music_decoder_path, torch_dtype=dtype)
+            self.generation_model.to("cuda")
             print(f'AudioLDM2 initialized...')
         else:
             # The model files for MusicGen can be downloaded here in case of network issues:
@@ -609,8 +614,8 @@ class M2UGen(nn.Module):
             print("Generating Music...")
             audio_outputs = self.generation_model(music_caption[0],
                                                   num_inference_steps=200,
-                                                  guidance_scale=3.5,
-                                                  negative_prompt='Low Quality',
+                                                  num_waveforms_per_prompt=3,
+                                                  negative_prompt='Low quality.',
                                                   audio_length_in_s=audio_length_in_s).audios
             return audio_outputs
         else:
@@ -619,10 +624,8 @@ class M2UGen(nn.Module):
             gen_inputs = self.generation_processor(text=music_caption, padding='max_length',
                                                    max_length=128, truncation=True, return_tensors="pt").to(
                 self.device)
-            gen_emb = self.generation_model.generate(**gen_inputs, guidance_scale=3.5, encoder_only=True)
-            audio_outputs = self.generation_model.generate(guidance_scale=3.5,
-                                                           max_new_tokens=int(256 / 5 * audio_length_in_s),
-                                                           encoder_outputs=(gen_emb,))
+            audio_outputs = self.generation_model.generate(**gen_inputs, guidance_scale=3.5,
+                                                           max_new_tokens=int(256 / 5 * audio_length_in_s))
             return audio_outputs[0][0].cpu().detach().numpy()
 
     @torch.inference_mode()
