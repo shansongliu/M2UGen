@@ -31,7 +31,8 @@ Ensure that the NVIDIA Driver is version 12 or above to be compatible with PyTor
 For the working of our model, Facebook's LLaMA-2 model weights are required, details on obtaining these weights are given on [HuggingFace](https://huggingface.co/docs/transformers/main/model_doc/llama). 
 
 The trained checkpoints for our model is available here:
-- [M<sup>2</sup>UGen with MusicGen](https://huggingface.co/M2UGen/M2UGen-MusicGen)
+- [M<sup>2</sup>UGen with MusicGen Small](https://huggingface.co/M2UGen/M2UGen-MusicGen-small)
+- [M<sup>2</sup>UGen with MusicGen Medium](https://huggingface.co/M2UGen/M2UGen-MusicGen-medium)
 - [M<sup>2</sup>UGen with AudioLDM2](https://huggingface.co/M2UGen/M2UGen-AudioLDM2)
 
 The needed pretrained multi-modal encoder and music decoder models can be found here:
