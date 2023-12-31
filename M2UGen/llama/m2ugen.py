@@ -612,7 +612,7 @@ class M2UGen(nn.Module):
             prompt_embeds = prompt_embeds.reshape(prompt_embeds.shape[0], 128, 1024)
             generated_prompt_embeds = generated_prompt_embeds.reshape(generated_prompt_embeds.shape[0], 8, 768)
             print("Generating Music...")
-            audio_outputs = self.generation_model(music_caption[0],
+            audio_outputs = self.generation_model(music_caption,
                                                   num_inference_steps=200,
                                                   num_waveforms_per_prompt=3,
                                                   negative_prompt='Low quality.',
