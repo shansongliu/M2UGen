@@ -141,5 +141,4 @@ If you find this repo useful, please consider citing:
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=crypto-code/M2UGen&type=Date)](https://star-history.com/#crypto-code/M2UGen&Date)
-
+[![Star History Chart](https://api.star-history.com/svg?repos=shansongliu/M2UGen&type=Date)](https://star-history.com/#shansongliu/M2UGen&Date)
