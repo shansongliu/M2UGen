@@ -120,7 +120,7 @@ optional arguments:
 
 ## 🧰 System Hardware requirements
 
-For training, stage 1 and 2 use a single 32GB V100 GPU while stage 3 uses 2 32GB V100 GPUs. For inference, a single 32GB V100 GPU is used. For loading model checkpoint, aproximately 49GB of CPU memory is required.
+For training, stage 1 and 2 use a single 32GB V100 GPU while stage 3 uses 2 32GB V100 GPUs. For inference, a single 32GB V100 GPU is used. For loading model checkpoint, approximately 49GB of CPU memory is required.
 
 ## 🫡 Acknowledgements
 
