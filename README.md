@@ -92,7 +92,7 @@ To train the M<sup>2</sup>UGen model, run the [**_train_musicgen.sh_**](./M2UGen
 
 The main model architecture is given in [**_m2ugen.py_**](./M2UGen/llama/m2ugen.py) and the modified MusicGen and AudioLDM2 architectures are present within the [**_musicgen_**](./M2UGen/llama/musicgen/) and [**_audioldm2_**](./M2UGen/llama/audioldm2/) folders respectively. The [**_data_**](./M2UGen/data/) folder contains the python files to handle loading the dataset. The [**_dataset.py_**](./M2UGen/data/dataset.py) file will show the use of different datasets based on the training stage. The code for the training epochs are present in [**_engine_train.py_**](./M2UGen/engine_train.py).
 
-## 🔨 Model Testing
+## 🔨 Model Testing and Evaluation
 
 To test the M<sup>2</sup>UGen model, run [**_gradio_app.py_**](./M2UGen/gradio_app.py).
 
@@ -117,6 +117,8 @@ optional arguments:
   --music_decoder MUSIC_DECODER
                         Decoder to use musicgen/audioldm2
 ```
+
+To evaluate the M<sup>2</sup>UGen model and other compared models in our paper, please refer to [**_Evaluation_**](./Evaluation) folder.
 
 ## 🧰 System Hardware requirements
 
