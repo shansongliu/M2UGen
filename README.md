@@ -7,6 +7,7 @@
 
 [![PWC](https://img.shields.io/badge/%F0%9F%93%8E%20arXiv-Paper-red)](https://arxiv.org/abs/2311.11255)
 [![PWC](https://img.shields.io/badge/%F0%9F%8C%8E%20Website-Official%20Page-blue)](https://crypto-code.github.io/M2UGen-Demo/)
+[![PWC](https://img.shields.io/badge/HuggingFace-Demo-Green)](hhttps://huggingface.co/spaces/M2UGen/M2UGen-Demo)
 
 This is the official repository for *[M<sup>2</sup>UGen: Multi-modal Music Understanding and Generation with the Power of Large Language Models](https://arxiv.org/abs/2308.11276)*.
 
@@ -19,6 +20,10 @@ The M<sup>2</sup>UGen model is a Music Understanding and Generation model that i
 </p>
 
 To train our model, we generate datasets using a music captioning and question answering model, i.e. the [MU-LLaMA](https://github.com/crypto-code/MU-LLaMA) model. The dataset generation methods are given in the [Datasets](./Datasets) folder. 
+
+## 🤗 HuggingFace Demo
+
+We have provided a HuggingFace Space to see our model in action: [M2UGen/M2UGen-Demo](https://huggingface.co/spaces/M2UGen/M2UGen-Demo).
 
 ## 🤖 Model Setup
 
