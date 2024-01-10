@@ -268,20 +268,11 @@ def predict(
         video = read_video_pyav(container=container, indices=indices)
 
     if len(generated_audio_files) != 0:
-        audio_length_in_s = get_audio_length(generated_audio_files[-1])
-        print(f"Audio Length: {audio_length_in_s}")
         sample_rate = 24000
         waveform, sr = torchaudio.load(generated_audio_files[-1])
         if sample_rate != sr:
             waveform = torchaudio.functional.resample(waveform, orig_freq=sr, new_freq=sample_rate)
         audio = torch.mean(waveform, 0)
-    if video_path is not None:
-        audio_length_in_s = get_video_length(video_path)
-        print(f"Video Length: {audio_length_in_s}")
-    if audio_path is not None:
-        audio_length_in_s = get_audio_length(audio_path)
-        generated_audio_files.append(audio_path)
-        print(f"Audio Length: {audio_length_in_s}")
 
     print(image, video, audio)
     response = model.generate(prompts, audio, image, video, 512, temperature, top_p,

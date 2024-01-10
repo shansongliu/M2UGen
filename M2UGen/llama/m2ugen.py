@@ -231,15 +231,16 @@ class M2UGen(nn.Module):
         self.music_decoder = self.args.music_decoder.lower()
 
         # 4. prefix
-        self.query_layer = 20
+        self.query_layer = 6
         self.query_len = 1
-        self.prefix_query = nn.Embedding(self.query_layer * self.query_len, self.model_args.dim)
+        self.prefix_query = nn.Embedding(self.query_layer * 3 * self.query_len, self.model_args.dim)
 
         # 5. knn
         self.knn = knn
         if knn:
             import faiss
             self.index = faiss.read_index(download("https://huggingface.co/csuhan/knn/resolve/main/knn.index", knn_dir))
+            print(self.index)
 
         # 6. training criterion
         self.criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
@@ -493,29 +494,51 @@ class M2UGen(nn.Module):
         freqs_cis = self.llama.freqs_cis.to(h.device)
         freqs_cis = freqs_cis[start_pos:start_pos + seqlen]
 
-        feats = torch.zeros((1, 1, 4096)).to(self.device)
-        if audio_feats is not None:
-            feats += audio_feats
-        if video_feats is not None:
-            feats += video_feats
-        if image_feats is not None:
-            feats += image_feats
-
         mask = None
         mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device)
         mask = torch.triu(mask, diagonal=start_pos + 1).type_as(h)
 
         music_output_embedding = []
-        for layer in self.llama.layers[:-1 * self.query_layer]:
+        for layer in self.llama.layers[:-3 * self.query_layer]:
             h = layer(h, 0, freqs_cis, mask)
             music_output_embedding.append(h)
 
-        prefix_query = self.prefix_query.weight.reshape(self.query_layer, 1, 4096).unsqueeze(1)
+        prefix_query = self.prefix_query.weight.reshape(
+            self.query_layer * 3, 1, 4096).unsqueeze(1)
 
         prefix_index = 0
-        for layer in self.llama.layers[-1 * self.query_layer:]:
-            h = layer(h, 0, freqs_cis, mask, feats + prefix_query[prefix_index])
-            prefix_index = prefix_index + 1
+        if audio_feats is not None:
+            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, audio_feats + prefix_query[prefix_index])
+                music_output_embedding.append(h)
+                prefix_index = prefix_index + 1
+        else:
+            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
+                music_output_embedding.append(h)
+                prefix_index = prefix_index + 1
+
+        if image_feats is not None:
+            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, image_feats + prefix_query[prefix_index])
+                music_output_embedding.append(h)
+                prefix_index = prefix_index + 1
+        else:
+            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
+                music_output_embedding.append(h)
+                prefix_index = prefix_index + 1
+
+        if video_feats is not None:
+            for layer in self.llama.layers[-1 * self.query_layer:]:
+                h = layer(h, 0, freqs_cis, mask, video_feats + prefix_query[prefix_index])
+                music_output_embedding.append(h)
+                prefix_index = prefix_index + 1
+        else:
+            for layer in self.llama.layers[-1 * self.query_layer:]:
+                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
+                music_output_embedding.append(h)
+                prefix_index = prefix_index + 1
 
         h = self.llama.norm(h)
         output = self.llama.output(h[:, -1, :])
@@ -523,30 +546,53 @@ class M2UGen(nn.Module):
         return output.float(), torch.cat(music_output_embedding[-1:], dim=1)
 
     def forward(self, tokens, labels, audios=None, imgs=None, videos=None, music_caption=None):
-        feats = torch.zeros((1, 1, 4096)).to(self.device)
+        audio_feats, video_feats, image_feats = None, None, None
         if audios is not None:
-            feats += self.forward_audio({'Audio': [audios, 1]})
+            audio_feats = self.forward_audio({'Audio': [audios, 1]})
         if videos is not None:
-            feats += self.forward_video({'Video': [videos, 1]})
+            video_feats = self.forward_video({'Video': [videos, 1]})
         if imgs is not None:
-            feats += self.forward_image({'Image': [imgs, 1]})
+            image_feats = self.forward_image({'Image': [imgs, 1]})
         _bsz, seqlen = tokens.shape
 
         h = self.llama.tok_embeddings(tokens.to(self.device))
         freqs_cis = self.llama.freqs_cis.to(h.device)
         freqs_cis = freqs_cis[:seqlen]
-        mask = None
         mask = torch.full((1, 1, seqlen, seqlen), float("-inf"), device=h.device)
         mask = torch.triu(mask, diagonal=0 + 1).type_as(h)
 
-        for layer in self.llama.layers[:-1 * self.query_layer]:
+        for layer in self.llama.layers[:-3 * self.query_layer]:
             h = layer(h, 0, freqs_cis, mask)
-        prefix_query = self.prefix_query.weight.reshape(self.query_layer, 1, 4096).unsqueeze(1)
-        prefix_index = 0
+        prefix_query = self.prefix_query.weight.reshape(
+            self.query_layer * 3, 1, 4096).unsqueeze(1)
 
-        for layer in self.llama.layers[-1 * self.query_layer:]:
-            h = layer(h, 0, freqs_cis, mask, feats + prefix_query[prefix_index])
-            prefix_index = prefix_index + 1
+        prefix_index = 0
+        if audio_feats is not None:
+            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, audio_feats + prefix_query[prefix_index])
+                prefix_index = prefix_index + 1
+        else:
+            for layer in self.llama.layers[-3 * self.query_layer:-2 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
+                prefix_index = prefix_index + 1
+
+        if image_feats is not None:
+            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, image_feats + prefix_query[prefix_index])
+                prefix_index = prefix_index + 1
+        else:
+            for layer in self.llama.layers[-2 * self.query_layer:-1 * self.query_layer]:
+                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
+                prefix_index = prefix_index + 1
+
+        if video_feats is not None:
+            for layer in self.llama.layers[-1 * self.query_layer:]:
+                h = layer(h, 0, freqs_cis, mask, video_feats + prefix_query[prefix_index])
+                prefix_index = prefix_index + 1
+        else:
+            for layer in self.llama.layers[-1 * self.query_layer:]:
+                h = layer(h, 0, freqs_cis, mask, prefix_query[prefix_index])
+                prefix_index = prefix_index + 1
 
         final_hidden = h
         h = self.llama.norm(h)
@@ -597,7 +643,6 @@ class M2UGen(nn.Module):
             if any([i in output for i in range(32000, 32008)]):
                 c_loss += 100
             mse_loss = torch.tensor(0.0)
-        del feats
         return c_loss, mse_loss
 
     @torch.inference_mode()
