@@ -7,6 +7,7 @@
 
 [![PWC](https://img.shields.io/badge/%F0%9F%93%8E%20arXiv-Paper-red)](https://arxiv.org/abs/2311.11255)
 [![PWC](https://img.shields.io/badge/%F0%9F%8C%8E%20Website-Official%20Page-blue)](https://crypto-code.github.io/M2UGen-Demo/)
+[![PWC](https://img.shields.io/badge/HuggingFace-Demo-Green)](https://huggingface.co/spaces/M2UGen/M2UGen-Demo)
 
 This is the official repository for *[M<sup>2</sup>UGen: Multi-modal Music Understanding and Generation with the Power of Large Language Models](https://arxiv.org/abs/2308.11276)*.
 
@@ -19,6 +20,10 @@ The M<sup>2</sup>UGen model is a Music Understanding and Generation model that i
 </p>
 
 To train our model, we generate datasets using a music captioning and question answering model, i.e. the [MU-LLaMA](https://github.com/crypto-code/MU-LLaMA) model. The dataset generation methods are given in the [Datasets](./Datasets) folder. 
+
+## 🤗 HuggingFace Demo
+
+We have provided a HuggingFace Space to see our model in action: [M2UGen/M2UGen-Demo](https://huggingface.co/spaces/M2UGen/M2UGen-Demo).
 
 ## 🤖 Model Setup
 
@@ -92,7 +97,7 @@ To train the M<sup>2</sup>UGen model, run the [**_train_musicgen.sh_**](./M2UGen
 
 The main model architecture is given in [**_m2ugen.py_**](./M2UGen/llama/m2ugen.py) and the modified MusicGen and AudioLDM2 architectures are present within the [**_musicgen_**](./M2UGen/llama/musicgen/) and [**_audioldm2_**](./M2UGen/llama/audioldm2/) folders respectively. The [**_data_**](./M2UGen/data/) folder contains the python files to handle loading the dataset. The [**_dataset.py_**](./M2UGen/data/dataset.py) file will show the use of different datasets based on the training stage. The code for the training epochs are present in [**_engine_train.py_**](./M2UGen/engine_train.py).
 
-## 🔨 Model Testing
+## 🔨 Model Testing and Evaluation
 
 To test the M<sup>2</sup>UGen model, run [**_gradio_app.py_**](./M2UGen/gradio_app.py).
 
@@ -118,9 +123,11 @@ optional arguments:
                         Decoder to use musicgen/audioldm2
 ```
 
+To evaluate the M<sup>2</sup>UGen model and other compared models in our paper, please refer to [**_Evaluation_**](./Evaluation) folder.
+
 ## 🧰 System Hardware requirements
 
-For training, stage 1 and 2 use a single 32GB V100 GPU while stage 3 uses 2 32GB V100 GPUs. For inference, a single 32GB V100 GPU is used. For loading model checkpoint, aproximately 49GB of CPU memory is required.
+For training, stage 1 and 2 use a single 32GB V100 GPU while stage 3 uses 2 32GB V100 GPUs. For inference, a single 32GB V100 GPU is used. For loading model checkpoint, approximately 49GB of CPU memory is required.
 
 ## 🫡 Acknowledgements
 
@@ -138,3 +145,7 @@ If you find this repo useful, please consider citing:
   year={2023}
 }
 ```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=shansongliu/M2UGen&type=Date)](https://star-history.com/#shansongliu/M2UGen&Date)
