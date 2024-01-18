@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ PyTorch Musicgen model."""
+"""Original reference link: https://github.com/huggingface/transformers/blob/main/src/transformers/models/musicgen/modeling_musicgen.py"""
 import copy
 import inspect
 import math
