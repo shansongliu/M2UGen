@@ -73,12 +73,12 @@ Once downloaded, the Gradio demo can be run using these checkpoints.
 
 For model with MusicGen
 ```
-python gradio_app.py --model ./ckpts/M2UGen-MusicGen --llama_dir ./ckpts/LLaMA-2 --music_decoder musicgen
+python gradio_app.py --model ./ckpts/M2UGen-MusicGen/checkpoint.pth --llama_dir ./ckpts/LLaMA-2 --music_decoder musicgen
 ```
 
 For model with AudioLDM2
 ```
-python gradio_app.py --model ./ckpts/M2UGen-AudioLDM2 --llama_dir ./ckpts/LLaMA-2 --music_decoder audioldm2
+python gradio_app.py --model ./ckpts/M2UGen-AudioLDM2/checkpoint.pth  --llama_dir ./ckpts/LLaMA-2 --music_decoder audioldm2  --music_decoder_path cvssp/audioldm2
 ```
 
 ## 🗄️ Dataset Generation
