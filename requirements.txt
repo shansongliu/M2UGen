@@ -32,3 +32,4 @@ sentencepiece==0.1.99
 librosa==0.10.1
 ffprobe==0.5
 ffmpeg==1.4
+fad_pytorch
