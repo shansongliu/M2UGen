@@ -29,4 +29,4 @@ if not os.path.exists("./results/audioldm2"):
 for music, caption in tqdm(data):
     audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUCaps/audios_eval", music))
     audio = generate(caption, length_in_sec=audioSegment.duration_seconds)
-    scipy.io.wavfile.write(f"./results/audioldm2/{music}", rate=16000, data=audio[0])
+    scipy.io.wavfile.write(f"./results/audioldm2/{music.replace('.mp3', '.wav')}", rate=16000, data=audio[0])

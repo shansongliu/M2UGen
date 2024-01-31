@@ -99,4 +99,4 @@ for file in source_files:
 for music, instruction in data.keys():
     audioSegment = AudioSegment.from_wav(os.path.join("./results/source/", music))
     audio = generate(instruction, f"./results/source/{music}", length_in_sec=audioSegment.duration_seconds)
-    scipy.io.wavfile.write(f"./results/m2ugen/{music}", rate=16000, data=audio)
+    scipy.io.wavfile.write(f"./results/m2ugen/{music.replace('.mp3', '.wav')}", rate=16000, data=audio)
