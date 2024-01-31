@@ -44,4 +44,4 @@ for row in tqdm(data):
     prompt = row['conversation'][0]['value']
     audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUVideo/audioset", music))
     audio = generate(prompt, video)
-    scipy.io.wavfile.write(f"./results/codi/{music}", rate=16000, data=audio)
+    scipy.io.wavfile.write(f"./results/codi/{music.replace('.mp3', '.wav')}", rate=16000, data=audio)

@@ -96,4 +96,4 @@ for row in tqdm(data):
     prompt = row['conversation'][0]['value']
     audioSegment = AudioSegment.from_wav(os.path.join("../../Datasets/MUImage/audioset", music))
     audio = generate(prompt, image, length_in_sec=audioSegment.duration_seconds)
-    scipy.io.wavfile.write(f"./results/m2ugen/{music}", rate=16000, data=audio)
+    scipy.io.wavfile.write(f"./results/m2ugen/{music.replace('.mp3', '.wav')}", rate=16000, data=audio)
