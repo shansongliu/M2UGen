@@ -91,6 +91,10 @@ The datasets are also available for download here:
 - [MUImage](https://huggingface.co/datasets/M2UGen/MUImage)
 - [MUVideo](https://huggingface.co/datasets/M2UGen/MUVideo)
 
+Apart from the generated datasets, M2UGen also utilizes the COCO and Alpaca datasets. 
+For the COCO dataset, download the 2014 train dataset from [here](https://cocodataset.org/#download) and place the files in the COCO folder under Datasets.
+The Alpaca dataset file is already provided under [Datasets/Alpaca](./Datasets/Alpaca).
+
 ## 🔧 Model Training
 
 To train the M<sup>2</sup>UGen model, run the [**_train_musicgen.sh_**](./M2UGen/train_musicgen.sh) or [**_train_audioldm2.sh_**](./M2UGen/train_audioldm2.sh) script. The scripts are designed to train the model for all three stages with [MusicGen](https://huggingface.co/docs/transformers/model_doc/musicgen) and [AudioLDM2](https://huggingface.co/docs/diffusers/main/en/api/pipelines/audioldm2) music decoders respectively.
