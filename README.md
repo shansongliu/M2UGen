@@ -93,7 +93,7 @@ The datasets are also available for download here:
 
 Apart from the generated datasets, M2UGen also utilizes the COCO and Alpaca datasets. 
 For the COCO dataset, download the 2014 train dataset from [here](https://cocodataset.org/#download) and place the files in the COCO folder under Datasets.
-For the Alpaca dataset, download the json file [here](https://github.com/tatsu-lab/stanford_alpaca/blob/main/alpaca_data.json) and place the file within the Alpaca folder under Datasets.
+The Alpaca dataset file is already provided under [Datasets/Alpaca](./Datasets/Alpaca).
 
 ## 🔧 Model Training
 
